@@ -1,0 +1,3 @@
+[submodule "python/find-fix-git-email-leak"]
+	path = python/find-fix-git-email-leak
+	url = https://github.com/bearlike/find-fix-git-email-leak.git
