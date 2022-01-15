@@ -45,7 +45,8 @@ def delete_record(zone_name, dns_name):
     if len(dns_records) < 1:
         print("Records do not exist")
         sys.exit(-1)
-    print(len(dns_records), "DNS (A) Records will be deleted. Contine? (Type 'YES' to proceed): ", end="")
+    print(len(dns_records),
+          "DNS (A) Records will be deleted. Contine? (Type 'YES' to proceed): ", end="")
     confirm_text = str(input())
     if not(confirm_text == "YES" or confirm_text == "yes"):
         print("User Aborted...")
