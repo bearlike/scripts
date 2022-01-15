@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 
 import samsungctl
-from socket import timeout
+from os import getenv
+from dotenv import load_dotenv
+import sys
 
-exit(0)
+load_dotenv()  # take environment variables from .env.
+
+tv_id = getenv("SAMSUNG_TV_ID", default=None)
+tv_host = getenv("SAMSUNG_TV_HOST", default=None)
+if None in [tv_id, tv_host]:
+    print("Enviroinment variables not found.")
+    sys.exit(-1)
+
 config = {
     "name": "samsungctl",
     "description": "PC",
@@ -16,8 +25,9 @@ config = {
 
 try:
     with samsungctl.Remote(config) as remote:
-         remote.control("KEY_POWEROFF")
-except OSError: 
+        remote.control("KEY_POWEROFF")
+except OSError:
     print("No route to Host or TV...")
-except:
-    print("Connection to TV timed out...") 
+# skipcq: PYL-W0703
+except Exception as error:
+    print(f"Connection to TV error due to {error}")

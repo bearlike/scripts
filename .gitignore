@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# IDE generated folders
+.vscode/
+
+# Enviroinment variable file
+.env

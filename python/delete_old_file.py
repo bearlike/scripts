@@ -12,8 +12,8 @@ logging.basicConfig(filename='delete_service.log',
 
 
 def run(
-        path="/mnt/Downloads",
-        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"],
+        path="/path/to/downloads",
+        exceptions=None,
         max_days=10
 ):
     """
@@ -22,6 +22,8 @@ def run(
         exceptions (list, optional): List of directory paths to be excempted.
         max_days (int, optional): Number of days.
     """
+    if exceptions is None:
+        exceptions = []
     logging.info("Service started...")
     del_size, del_count = 0, 0
     try:
@@ -40,9 +42,12 @@ def run(
                         del_count += 1
                         del_size += file_size
                         logging.debug(
-                            f"Deleted '{file_path}', Modified on '{modified_time:%d-%m-%Y %H:%M}', of size '{file_size} bytes'")
+                            f"Deleted '{file_path}', Modified on \
+                                '{modified_time:%d-%m-%Y %H:%M}', of \
+                                    size '{file_size} bytes'")
         logging.info(
             f"Service finished. Deleted {del_count} files of {del_size} bytes")
+    # skipcq: PYL-W0703
     except Exception as _err:
         logging.error(f"Service interrupted. {_err}")
         logging.error(
@@ -50,4 +55,6 @@ def run(
 
 
 if __name__ == "__main__":
-    run(max_days)
+    run(path="/mnt/Downloads",
+        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"],
+        max_days=10)

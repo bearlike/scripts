@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """ Companion script for my Macro Keyboard.
 Use 'me2d13/luamacros' for keyboard input grabbing.
+
+Note: Make sure this script is run only by trusted users.
 """
 from pynput.keyboard import Key, Controller
-from os import system, environ, path
-from sys import argv
+from os import system, path, getenv
+import sys
 import requests
 import json
 import paramiko
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
 
 file_path = path.realpath(__file__)
 logging.basicConfig(filename=f'{file_path}/../windows_macro.log',
@@ -30,58 +35,71 @@ def keebs_shortcut(s_key):
             keyboard.press(k)
         for k in shortcuts[s_key]:
             keyboard.release(k)
-    except Exception as e:
-        logging.error("keebs_shortcut:", e)
+    # skipcq: PYL-W0703
+    except Exception as error:
+        logging.error(f"keebs_shortcut: {error}")
 
 
 def turn_off_tv():
     """ Turn off TV and XServer
     """
+    h_host = getenv("HOME_ASSISTANT_API_HOST", default=None)
+    h_token = getenv("HOME_ASSISTANT_API_TOKEN", default=None)
+    ssh_host = getenv("REMOTE_1_SSH_HOST", default=None)
+    ssh_uname = getenv("REMOTE_1_SSH_UNAME", default=None)
+    ssh_pass = getenv("REMOTE_1_SSH_PASS", default=None)
+    if None in [h_host, h_token, ssh_host, ssh_uname, ssh_pass]:
+        print("Enviroinment variables not found.")
+        sys.exit(-1)
     headers = {
-        'Authorization': f"Bearer {environ['HOME_ASS_API_KEY']}"
+        'Authorization': f"Bearer {h_token}"
     }
     # Using SSH to stop gdm3 on the ubuntu-htpc
     try:
         ssh = paramiko.SSHClient()
-        ssh_pass = environ['SSH_APOLLO_PASS']
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect("192.168.1.16", username="kk", password=ssh_pass)
+        ssh.connect(ssh_host, username=ssh_uname, password=ssh_pass)
+        # skipcq: BAN-B601
         ssh.exec_command(
             f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
         ssh.close()
-    except Exception as e:
-        logging.error("turn_off_tv (SSH):", e)
+    # skipcq: PYL-W0703
+    except Exception as error:
+        logging.error(f"turn_off_tv (SSH): {error}")
     # Using Home Assistant to turn off TV
     try:
         data = {"entity_id": "media_player.samsung_tv"}
-        hostname = "http://192.168.1.29:8123"
+        hostname = h_host
         requests.post(
             f'{hostname}/api/services/media_player/turn_off',
             headers=headers,
             data=json.dumps(data)
         )
-    except Exception as e:
-        logging.error("turn_off_tv (TV):", e)
+    # skipcq: PYL-W0703
+    except Exception as error:
+        logging.error(f"turn_off_tv (TV): {error}")
 
 
 def win_run(cmd: str):
     """ Execute system commands
     """
     try:
+        # skipcq: BAN-B605
         system(cmd)
-    except Exception as e:
-        logging.error("win_run:", e)
+    # skipcq: PYL-W0703
+    except Exception as error:
+        logging.error(f"win_run: {error}")
 
 
 def main():
-    if argv[1] == "run":
-        win_run(argv[2])
-    elif argv[1] == "keebs":
-        keebs_shortcut(argv[2])
-    elif argv[1] == "off_tv":
+    if sys.argv[1] == "run":
+        win_run(sys.argv[2])
+    elif sys.argv[1] == "keebs":
+        keebs_shortcut(sys.argv[2])
+    elif sys.argv[1] == "off_tv":
         turn_off_tv()
     else:
-        logging.warning(f"'{argv[1]}'' flag does not exist.")
+        logging.warning(f"'{sys.argv[1]}'' flag does not exist.")
 
 
 if __name__ == "__main__":
