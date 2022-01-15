@@ -31,7 +31,7 @@ def return_zone_info(cf, zone_name):
         zone_info = cf.zones.get(params={'name': zone_name})[0]
     except IndexError:
         print("Zone does not exist in this token.")
-        exit(-1)
+        sys.exit(-1)
     return zone_info
 
 
@@ -44,18 +44,18 @@ def delete_record(zone_name, dns_name):
         zone_id, params={'name': dns_name + '.' + zone_name})
     if len(dns_records) < 1:
         print("Records do not exist")
-        exit(-1)
+        sys.exit(-1)
     print(len(dns_records),
           "DNS (A) Records will be deleted. Contine? (Type 'YES' to proceed): ", end="")
     confirm_text = str(input())
     if not(confirm_text == "YES" or confirm_text == "yes"):
         print("User Aborted...")
-        exit(0)
+        sys.exit(0)
     for dns_record in dns_records:
         dns_record_id = dns_record['id']
         r = cf.zones.dns_records.delete(zone_id, dns_record_id)
     print("Record(s) successfully deleted.")
-    exit(0)
+    sys.exit(0)
 
 
 if __name__ == '__main__':
