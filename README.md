@@ -1,6 +1,8 @@
 # Scripts
 Collection of automation scripts. Use it if you have the same purpose.
 
+![CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-brightgreen)
+
 Got scripts? See [Contributing](.github/CONTRIBUTING.md).
 <br> Got Issues? See [Issues](https://github.com/bearlike/scripts/issues)
 
