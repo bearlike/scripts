@@ -51,6 +51,5 @@ def run(
 
 if __name__ == "__main__":
     run(path="/mnt/Downloads",
-        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"], 
+        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"],
         max_days=10)
-        
