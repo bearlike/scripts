@@ -6,8 +6,9 @@ Note:
 For better codebase privacy/security, refer configuration file for
 authentication in python-cloudflare docs. This is for internal usage.
 """
-import CloudFlare # pip3 install cloudflare
+import CloudFlare  # pip3 install cloudflare
 import sys
+
 
 def print_help():
     help_string = """
@@ -22,6 +23,7 @@ def print_help():
     python3 create-dns-record.py example.com subdomain
     """
     print(help_string)
+
 
 def return_zone_info(cf, zone_name):
     try:
@@ -46,6 +48,7 @@ def add_record(zone_name, subdomain):
     if r['name'] == subdomain+'.'+zone_name:
         print(r['name'], "added successfully.")
     exit(0)
+
 
 if __name__ == '__main__':
     try:
