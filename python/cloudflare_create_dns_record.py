@@ -50,7 +50,6 @@ def add_record(zone_name, subdomain):
     sys.exit(0)
 
 
-
 if __name__ == '__main__':
     try:
         zone_name = sys.argv[1]
