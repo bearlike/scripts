@@ -12,8 +12,8 @@ logging.basicConfig(filename='delete_service.log',
 
 
 def run(
-        path="/mnt/Downloads",
-        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"],
+        path="/path/to/downloads",
+        exceptions=[],
         max_days=10
 ):
     """
@@ -50,4 +50,7 @@ def run(
 
 
 if __name__ == "__main__":
-    run(max_days)
+    run(path="/mnt/Downloads",
+        exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"], 
+        max_days=10)
+        

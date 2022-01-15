@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import samsungctl
-from socket import timeout
 import sys
 
 config = {
@@ -19,5 +18,5 @@ try:
         remote.control("KEY_POWEROFF")
 except OSError:
     print("No route to Host or TV...")
-except:
-    print("Connection to TV timed out...")
+except Exception as error:
+    print(f"Connection to TV error due to {error}")

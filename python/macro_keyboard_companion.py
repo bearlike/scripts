@@ -30,8 +30,8 @@ def keebs_shortcut(s_key):
             keyboard.press(k)
         for k in shortcuts[s_key]:
             keyboard.release(k)
-    except Exception as e:
-        logging.error("keebs_shortcut:", e)
+    except Exception as error:
+        logging.error(f"keebs_shortcut: {error}")
 
 
 def turn_off_tv():
@@ -49,8 +49,8 @@ def turn_off_tv():
         ssh.exec_command(
             f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
         ssh.close()
-    except Exception as e:
-        logging.error("turn_off_tv (SSH):", e)
+    except Exception as error:
+        logging.error(f"turn_off_tv (SSH): {error}")
     # Using Home Assistant to turn off TV
     try:
         data = {"entity_id": "media_player.samsung_tv"}
@@ -60,8 +60,8 @@ def turn_off_tv():
             headers=headers,
             data=json.dumps(data)
         )
-    except Exception as e:
-        logging.error("turn_off_tv (TV):", e)
+    except Exception as error:
+        logging.error(f"turn_off_tv (TV): {error}")
 
 
 def win_run(cmd: str):
@@ -69,8 +69,8 @@ def win_run(cmd: str):
     """
     try:
         system(cmd)
-    except Exception as e:
-        logging.error("win_run:", e)
+    except Exception as error:
+        logging.error(f"win_run: {error}")
 
 
 def main():

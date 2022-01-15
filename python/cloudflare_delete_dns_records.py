@@ -14,7 +14,7 @@ import sys
 def print_help():
     help_string = """
     Deletes DNS A records using Cloudflare API v4.
-    
+
      USAGE
     =======
     python3 delete_dns_records.py [Zone Name] [Sub doman]
@@ -48,7 +48,7 @@ def delete_record(zone_name, dns_name):
     print(len(dns_records),
           "DNS (A) Records will be deleted. Contine? (Type 'YES' to proceed): ", end="")
     confirm_text = str(input())
-    if not(confirm_text == "YES" or confirm_text == "yes"):
+    if confirm_text not in ["YES", "yes"]:
         print("User Aborted...")
         sys.exit(0)
     for dns_record in dns_records:

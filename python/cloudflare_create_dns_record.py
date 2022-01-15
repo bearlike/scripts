@@ -13,7 +13,7 @@ import sys
 def print_help():
     help_string = """
     Adds DNS A records pointing to this server.
-    
+
      USAGE
     =======
     python3 create-dns-record.py [ZONE_NAME] [SUBDOMAIN]
