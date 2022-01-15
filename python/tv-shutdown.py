@@ -4,7 +4,6 @@ import samsungctl
 from socket import timeout
 import sys
 
-sys.exit(0)
 config = {
     "name": "samsungctl",
     "description": "PC",
