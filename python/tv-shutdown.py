@@ -2,8 +2,8 @@
 
 import samsungctl
 from socket import timeout
+import sys
 
-exit(0)
 config = {
     "name": "samsungctl",
     "description": "PC",
@@ -16,8 +16,8 @@ config = {
 
 try:
     with samsungctl.Remote(config) as remote:
-         remote.control("KEY_POWEROFF")
-except OSError: 
+        remote.control("KEY_POWEROFF")
+except OSError:
     print("No route to Host or TV...")
 except:
-    print("Connection to TV timed out...") 
+    print("Connection to TV timed out...")
