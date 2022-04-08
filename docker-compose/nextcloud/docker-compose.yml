@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb:10.7.3-focal
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - /AppData/nextcloud/mariadb:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+
+  app:
+    image: nextcloud:latest
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - /AppData/nextcloud/html:/var/www/html
+      - /AppData/nextcloud/data:/srv/nextcloud/data
+    environment:
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_HOST: mariadb
+    # Install Imagick and start nextcloud
+    command: >
+      bash -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq libmagickcore-6.q16-6-extra && DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* && apache2-foreground"
+
+networks:
+  default:
+    driver: bridge

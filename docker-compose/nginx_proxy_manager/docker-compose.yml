@@ -1,0 +1,27 @@
+version: '3'
+services:
+  npm-app:
+    container_name: nginx-proxy-manager
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /AppData/nginx-pm/data:/data
+      - /AppData/nginx-pm/letsencrypt:/etc/letsencrypt
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+    healthcheck:
+      test: [ "CMD", "/bin/check-health" ]
+      interval: 10s
+      timeout: 3s
+    environment:
+      DISABLE_IPV6: 'true'
+
+networks:
+  default:
+    external:
+      name: nginx-proxy

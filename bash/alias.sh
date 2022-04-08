@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Human friendly aliases and functions
+# @title: Alias and functions
+# @description: Human friendly aliases and functions
 
 : ' Personal Aliases and Functions
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
@@ -67,10 +68,10 @@ alias d-ex="docker exec -i -t"
 alias d-cl="docker system prune"
 
 # Stop all containers
-d-stop-all() { docker stop $(docker ps -a -q) }
+d-stop-all() { docker stop $(docker ps -a -q); }
 
 # Show all docker related aliases
-d-alias() { _guide_alias_ "Docker" "docker" }
+d-alias() { _guide_alias_ "Docker" "docker"; }
 
 # Bash into a running container
 # arg $1 : container name/id
@@ -88,6 +89,6 @@ normal=$(tput sgr0)
 # arg $1 : Title
 # arg $2 : grep argument
 _guide_alias_() {
-    printf "${underline}${1} aliases${nounderline}\n\n"
-    alias | grep $2 | sed "s/^\([^=]*\)=\(.*\)/\1 \t=>   \2/" | sed "s/['|\']//g" | sort
+    printf "${underline}${1} aliases${nounderline}\n\n";
+    alias | grep $2 | sed "s/^\([^=]*\)=\(.*\)/\1 \t=>   \2/" | sed "s/['|\']//g" | sort;
 }

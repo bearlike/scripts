@@ -1,0 +1,23 @@
+version: "3"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    hostname: Gemini
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "81:80/tcp"
+    environment:
+      TZ: 'Asia/Kolkata'
+      WEBPASSWORD: ${WEBPASSWORD} # 'set a secure password here or it will be random'
+      DEBIAN_FRONTEND: noninteractive
+    # Volumes store your data between container upgrades
+    volumes:
+      - '/AppData/pihole/etc/pihole:/etc/pihole'
+      - '/AppData/pihole/etc/dnsmasq.d:/etc/dnsmasq.d'
+      - '/etc/timezone:/etc/timezone:ro'
+    restart: unless-stopped

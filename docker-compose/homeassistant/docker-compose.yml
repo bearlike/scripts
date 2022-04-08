@@ -1,0 +1,19 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: homeassistant
+    hostname: "adam"
+    image: "homeassistant/home-assistant:stable"
+    volumes:
+      - /AppData/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    mem_limit: 1024M
+    cpus: 1
+
+networks:
+  nginx-proxy:
+    external: true

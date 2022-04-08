@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-""" Retrieves `Gotify` tokens from `Simple Secrets Manager (SSM)` and 
-sends notification on user login. For Windows, Use task scheduler to automate."""
+""" Retrieves `Gotify` tokens from `Simple Secrets Manager (SSM)` and sends
+notification on user login. For Windows, Use task scheduler to automate."""
 import requests
 from datetime import datetime
 import getpass
 import os
 import logging
+import sys
 
 # Alter log path if necessary
-LOG_PATH = "C:\Files\logs\general.log"
+LOG_PATH = "C:\\Files\\logs\\general.log"
 logging.basicConfig(filename=LOG_PATH,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%d-%m-%Y %H:%M:%S',
@@ -16,12 +17,12 @@ logging.basicConfig(filename=LOG_PATH,
 
 
 def get_key():
-    """ Returns Gotify token from SSM 
+    """ Returns Gotify token from SSM
     Returns:
         str: Gotify Token
     """
     # Reading the SSM_TOKEN from Enviroinment variables.
-    ssm_token = os.environ.get("SSM_TOKEN", None)
+    ssm_token = os.environ.get("SSM_TOKEN")
     if ssm_token is not None:
         path, keyname = "gotify", "SECURITY_NOTIFICATIONS"
         # https://github.com/bearlike/simple-secrets-manager
@@ -32,7 +33,6 @@ def get_key():
         for count in range(retries):
             try:
                 response = requests.get(ssm_url, headers=headers, timeout=10)
-                code = response.status_code
                 if response.status_code == 200:
                     return response.json().get("value")
             except requests.exceptions.Timeout:
@@ -41,8 +41,8 @@ def get_key():
             except requests.ConnectionError as error:
                 logging.error(
                     f"[{count+1}/{retries}] Connection error to SSM: {error}")
-        logging.error(f"Couldn't reach SSM. Halting!")
-        exit(-1)
+        logging.error("Couldn't reach SSM. Halting!")
+    return None
 
 
 def now():
@@ -57,6 +57,8 @@ def now():
 
 def send_notification(title, message, priority):
     secret = get_key()
+    if secret is None:
+        sys.exit(-1)
     url = f"https://gotify.adam.home/message?token={ secret }"
     head = {}
     data = {

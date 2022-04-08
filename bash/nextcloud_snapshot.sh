@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Snapshot Nextcloud and uploads to remote locations such as Google Drive
-
-# Can be used as a Cronjob
+# @title: Nextcloud Snapshot
+# @description: Snapshot Nextcloud and uploads to remote locations such as Google Drive. Can be used as a Cronjob.
 # Tested on Ubuntu Server 20.04 LTS
 
 # Make sure enviroinment variables are set in .bashrc
-source_path=$NC_SOURCE_PATH # Where nextcloud is
-archive_path=$NC_ARCHIVE_PATH  # Where you want to store the archive
+source_path=$NC_SOURCE_PATH   # Where nextcloud is
+archive_path=$NC_ARCHIVE_PATH # Where you want to store the archive
 archive_password=$NC_ARCHIVE_PASSWORD
 remote_path=$NC_REMOTE_PATH # rClone must be configured (eg: gdrive:snapshots)
 
@@ -32,7 +31,7 @@ rm -rf "${archive_path:?}/"*
 # 7z compress and password protect file
 # > sudo apt install p7zip-full
 echo -e "${GREEN}Compression started....${NC}"
-7z a $archive_path/$archive_name -p$archive_password -mhe $source_path
+7z a "$archive_path"/"$archive_name" -p"$archive_password" -mhe "$source_path"
 echo -e "${GREEN}Finished Compression${NC}"
 
 # Upload to gdrive using rclone

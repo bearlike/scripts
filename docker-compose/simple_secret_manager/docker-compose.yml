@@ -1,0 +1,39 @@
+version: '3'
+
+volumes:
+  mongo_data:
+
+services:
+  mongo:
+    image: mongo:4
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - mongo_data:/data/db
+    networks:
+      - app-tier
+
+  ssm-app:
+    image: krishnaalagiri/ssm:latest
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      CONNECTION_STRING: mongodb://root:password@mongo:27017
+      PORT: 5000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - app-tier
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true
+  app-tier:
+    driver: bridge

@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  gotify:
+    container_name: gotify
+    image: gotify/server-arm64
+    restart: always
+    ports:
+      - "89:80"
+    volumes:
+      - /AppData/gotify:/app/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      GOTIFY_DEFAULTUSER_NAME: ${username}
+      GOTIFY_DEFAULTUSER_PASS: ${password}
+      TZ: Asia/Kolkata
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true
