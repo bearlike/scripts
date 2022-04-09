@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Removing unused apt packages, kernels, thumbnail cache, and docker objects.
-# Last Updated June 2, 2020
-# Tested on Ubuntu Server 20.04 LTS
+# Tested on Ubuntu Server 20.04 LTS and Raspberry Pi OS
 
 # Variables for pretty printing
 RED=$(tput bold)$(tput setaf 1)   # Red Color
@@ -56,6 +55,9 @@ echo -e "${RED}Cleaning Thumbnails...${NC}" &&
     docker image prune -a -f --filter "until=24h" &&
     docker volume prune -f &&
     docker network prune -f
+
+# Delete journal logs older than 5 days
+sudo journalctl --vacuum-time=5days
 
 # Summarization
 END=$(df /home --output=used | grep -Eo '[0-9]+')
