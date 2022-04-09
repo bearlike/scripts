@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  scanner-app:
+    container_name: scanner-app
+    image: sbs20/scanservjs:latest
+    restart: always
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+      - /AppData/scanner/scan-cfg:/app/config
+      - /home/pi/Scans:/app/data/output
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      SANED_NET_HOSTS: 192.168.1.29
+    # Install hplip and start server
+    # Refer, https://github.com/sbs20/scanservjs/blob/master/docs/sane.md#configuring-the-server
+    entrypoint: >
+      bash -c "apt-get update  && DEBIAN_FRONTEND=noninteractive apt-get install -yq hplip libsane-hpaio  && DEBIAN_FRONTEND=noninteractive apt-get clean && echo hpaio >> /etc/sane.d/dll.conf  && rm -rf /var/lib/apt/lists/*  && /run.sh"
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true

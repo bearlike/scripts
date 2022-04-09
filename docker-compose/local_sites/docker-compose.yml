@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  local-sites:
+    container_name: local-sites
+    image: php:7.2-apache
+    restart: always
+    volumes:
+      - /AppData/local-sites/conf:/etc/apache2
+      - /AppData/local-sites/www:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true

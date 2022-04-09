@@ -1,0 +1,34 @@
+version: "3.1"
+
+volumes:
+  mongo_data:
+
+services:
+  mongodb:
+    image: mongo:4
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: testdb
+
+  mongo-express:
+    image: mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    ports:
+      - 8081:8081
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ROOT_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${ROOT_USER}:${ROOT_PASSWORD}@mongodb:27017/

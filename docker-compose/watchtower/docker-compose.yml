@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /home/pi/.docker/config.json:/config.json
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      NO_COLOR: true
+      WATCHTOWER_CLEANUP: true
+      WATCHTOWER_INCLUDE_STOPPED: true
+      WATCHTOWER_INCLUDE_RESTARTING: true
+      WATCHTOWER_ROLLING_RESTART: true
+      WATCHTOWER_NOTIFICATIONS: gotify
+      WATCHTOWER_NOTIFICATION_GOTIFY_URL: http://gotify
+      WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: ${GOTIFY_URL}
+      WATCHTOWER_NOTIFICATIONS_HOSTNAME: "Adam - Watchtower"
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+    external: true
