@@ -31,7 +31,7 @@ rm -rf "${archive_path:?}/"*
 # 7z compress and password protect file
 # > sudo apt install p7zip-full
 echo -e "${GREEN}Compression started....${NC}"
-7z a $archive_path/$archive_name -p$archive_password -mhe $source_path
+7z a "$archive_path"/"$archive_name" -p"$archive_password" -mhe "$source_path"
 echo -e "${GREEN}Finished Compression${NC}"
 
 # Upload to gdrive using rclone

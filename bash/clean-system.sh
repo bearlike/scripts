@@ -29,6 +29,7 @@ OLD_KERNELS=$(
         grep -Ei 'linux-image|linux-headers|linux-modules' |
         awk '{ print $2 }'
 )
+# skipcq: SH-2154
 if [ "${#files[@]}" -ne "0" ]; then
     echo -e "\n${GREEN}Old Kernels to be removed:${NC}"
     echo -e "${GREEN}$OLD_KERNELS${NC}\n"
