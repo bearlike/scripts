@@ -6,6 +6,7 @@ from datetime import datetime
 import getpass
 import os
 import logging
+import sys
 
 # Alter log path if necessary
 LOG_PATH = "C:\\Files\\logs\\general.log"
@@ -21,7 +22,7 @@ def get_key():
         str: Gotify Token
     """
     # Reading the SSM_TOKEN from Enviroinment variables.
-    ssm_token = os.environ.get("SSM_TOKEN", None)
+    ssm_token = os.environ.get("SSM_TOKEN")
     if ssm_token is not None:
         path, keyname = "gotify", "SECURITY_NOTIFICATIONS"
         # https://github.com/bearlike/simple-secrets-manager
@@ -41,7 +42,7 @@ def get_key():
                 logging.error(
                     f"[{count+1}/{retries}] Connection error to SSM: {error}")
         logging.error("Couldn't reach SSM. Halting!")
-        exit(-1)
+    sys.exit(-1)
 
 
 def now():
