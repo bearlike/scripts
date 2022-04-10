@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Human friendly aliases and functions
+# @title: Alias and functions
+# @description: Human friendly aliases and functions
 
 : ' Personal Aliases and Functions
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'

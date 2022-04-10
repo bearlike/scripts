@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# For Updating Packages and Portainer
+# @title: Update System
+# @description: For Updating Packages and Portainer
 # Tested on Ubuntu 20.04
 
 LATEST="$(wget -qO- https://hub.docker.com/v1/repositories/portainer/portainer-ce/tags)"

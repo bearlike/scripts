@@ -1,5 +1,8 @@
-#!/bin/bash
-# Example: gotify-send.sh -t "Welcome" -m "Awesome Blosson" --secret ABCDEFGHIJKLMN
+#!/usr/bin/env bash
+# @title: Send notifications via gotify
+# @description: Send notifications via gotify
+# @usage: gotify-send.sh -t "title" -m "message" --secret ABCDEFGHIJKLMN
+
 HOST="https://gotify.adam.home"
 function usage() {
     cat <<USAGE
