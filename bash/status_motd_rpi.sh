@@ -21,20 +21,20 @@ RESET="tput sgr0"
 # Print Hostname
 ${YELLOW}
 
-if [ $(which toilet 2>/dev/null || false) ]; then
-    toilet -F metal -f smmono12 $(hostname)
-elif [ $(which figlet 2>/dev/null || false) ]; then
-    figlet $(hostname)
+if [ "$(which toilet 2>/dev/null || false)" ]; then
+    toilet -F metal -f smmono12 "$(hostname)"
+elif [ "$(which figlet 2>/dev/null || false)" ]; then
+    figlet "$(hostname)"
     print_line
 else
     echo "Hostname: $(hostname)"
 fi
 
 let upSeconds="$(/usr/bin/cut -d. -f1 /proc/uptime)"
-let secs=$((${upSeconds} % 60))
-let mins=$((${upSeconds} / 60 % 60))
-let hours=$((${upSeconds} / 3600 % 24))
-let days=$((${upSeconds} / 86400))
+let secs=$((upSeconds % 60))
+let mins=$((upSeconds / 60 % 60))
+let hours=$((upSeconds / 3600 % 24))
+let days=$((upSeconds / 86400))
 UPTIME=$(printf "%d days, %02dh %02dm %02ds" "$days" "$hours" "$mins" "$secs")
 
 # get the load averages

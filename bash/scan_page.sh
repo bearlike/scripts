@@ -10,4 +10,5 @@ fi
 mkdir -p ~/Scans
 # Make sure hplip is installed and SANE is configured
 # Should change depending on the scanner, this works on HP Deskjet 5800 series
-scanimage >~/Scans/$(date +"%F_%H.%M.%S_%Z").png --format png --resolution=200 --mode=Color -p
+filename="$(date +'%F_%H.%M.%S_%Z')"
+scanimage >~/Scans/"$filename".png --format png --resolution=200 --mode=Color -p

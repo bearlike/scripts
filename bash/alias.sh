@@ -89,6 +89,6 @@ normal=$(tput sgr0)
 # arg $1 : Title
 # arg $2 : grep argument
 _guide_alias_() {
-    printf "${underline}${1} aliases${nounderline}\n\n"
+    printf "${underline}${1} aliases${nounderline}\n\n";
     alias | grep $2 | sed "s/^\([^=]*\)=\(.*\)/\1 \t=>   \2/" | sed "s/['|\']//g" | sort;
 }

@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 3
 
       - name: Check modified files
         id: check_files
@@ -40,7 +40,7 @@ jobs:
     name: Update documentation
     runs-on: ubuntu-latest
     needs: check
-    if: needs.check.outputs.run_job == 'true'
+    if: github.event.action == 'workflow_dispatch' || needs.check.outputs.run_job == 'true'
     steps:
       - uses: actions/checkout@v2
         with:

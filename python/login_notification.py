@@ -42,7 +42,7 @@ def get_key():
                 logging.error(
                     f"[{count+1}/{retries}] Connection error to SSM: {error}")
         logging.error("Couldn't reach SSM. Halting!")
-    sys.exit(-1)
+    return None
 
 
 def now():
@@ -57,6 +57,8 @@ def now():
 
 def send_notification(title, message, priority):
     secret = get_key()
+    if secret is None:
+        sys.exit(-1)
     url = f"https://gotify.adam.home/message?token={ secret }"
     head = {}
     data = {
