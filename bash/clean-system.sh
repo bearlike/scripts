@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Removing unused apt packages, kernels, thumbnail cache, and docker objects.
+# @title: Clean System
+# @description: Removing unused apt packages, kernels, thumbnail cache, and docker objects.
 # Tested on Ubuntu Server 20.04 LTS and Raspberry Pi OS
 
 # Variables for pretty printing

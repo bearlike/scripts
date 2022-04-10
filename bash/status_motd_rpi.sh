@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Login MOTD for Raspberry Pi
+# @title: Raspberry Pi MOTD
+# @description: Raspberry Pi MOTD that displays basic system information on login.
+
 print_line() {
     for i in {0..50..1}; do
         printf "─"

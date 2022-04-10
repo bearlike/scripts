@@ -1,0 +1,29 @@
+name: Generate Documentations
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+        fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+    - uses: actions/setup-python@v3
+      name: Updating scripts table in README.md 
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+      run: |
+        cd docs\templates\ && pip install -r requirements.txt && python update_scripts_table.py
+    - name: Commit files
+      run: |
+        git config --local user.email "92151357+kalagiri-bot@users.noreply.github.com"
+        git config --local user.name "Krishna Alagiri [bot]"
+        git commit -m "[auto] Updating documentation" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        branch: ${{ github.ref }}
