@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 """ Retrieves `Gotify` tokens from `Simple Secrets Manager (SSM)` and sends
 notification on user login. For Windows, Use task scheduler to automate."""
-import requests
 from datetime import datetime
+from sys import platform
+import requests
+import logging
 import getpass
 import os
-import logging
 import sys
+
 
 # Alter log path if necessary
 LOG_PATH = "C:\\Files\\logs\\general.log"
@@ -21,12 +23,15 @@ def get_key():
     Returns:
         str: Gotify Token
     """
+    # Reading the SSM_URL from Enviroinment variables.
+    # Ex: https://secrets.adam.home
+    ssm_url = os.environ.get("SSM_URL")
     # Reading the SSM_TOKEN from Enviroinment variables.
     ssm_token = os.environ.get("SSM_TOKEN")
     if ssm_token is not None:
         path, keyname = "gotify", "SECURITY_NOTIFICATIONS"
         # https://github.com/bearlike/simple-secrets-manager
-        ssm_url = f"https://secrets.adam.home/api/secrets/kv/{path}/{keyname}"
+        ssm_url = f"{ssm_url}/api/secrets/kv/{path}/{keyname}"
         headers = {"X-API-KEY": ssm_token}
         # Retrying 5 times before giving up
         retries = 5
@@ -59,7 +64,8 @@ def send_notification(title, message, priority):
     secret = get_key()
     if secret is None:
         sys.exit(-1)
-    url = f"https://gotify.adam.home/message?token={ secret }"
+    gotify_url = os.environ.get("GOTIFY_URL")    
+    url = f"{gotify_url}/message?token={ secret }"
     head = {}
     data = {
         "title": title,
@@ -81,7 +87,14 @@ def send_notification(title, message, priority):
 
 
 def main():
-    hostname = "Shark-PC (Windows)"
+    if platform == "linux" or platform == "linux2":
+        os_name = "linux"
+    elif platform == "darwin":
+        os_name = "OS X"
+    elif platform == "win32":
+        os_name = "Windows"
+    # The below variable will be something "PCNAME (Windows)"
+    hostname = f"{ os.environ.get('COMPUTERNAME').title() } ({os_name})"
     title = f"{ getpass.getuser() } Logged into { hostname }"
     logging.info(title)
     send_notification(
