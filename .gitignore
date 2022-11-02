@@ -134,3 +134,5 @@ dmypy.json
 # Enviroinment variable file
 .env
 docs/~$scripts.xlsx
+
+powershell/wg_login_notification.ps1
