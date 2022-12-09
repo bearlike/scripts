@@ -6,8 +6,14 @@ $wireguard_network = "WG Network"
 $networks = (get-netconnectionProfile).Name
 
 if (($home_network -In $networks) -and ($wireguard_network -In $networks)) {
-    # Disconnect Wireguard, because there's no necessity for it
-    Start-Process 'C:\Program Files\WireGuard\wireguard.exe' -ArgumentList '/uninstalltunnelservice', "$wireguard_network.conf" -Wait -NoNewWindow -PassThru | Out-Null
+    Start-Process 'C:\Program Files\WireGuard\wireguard.exe' -ArgumentList '/uninstalltunnelservice', "$wireguard_network" -Wait -NoNewWindow -PassThru | Out-Null
+    # As a fallback, a dialog ballon is thrown
+    [reflection.assembly]::loadwithpartialname('System.Windows.Forms')
+    [reflection.assembly]::loadwithpartialname('System.Drawing')
+    $notify = new-object system.windows.forms.notifyicon
+    $notify.icon = [System.Drawing.SystemIcons]::Information
+    $notify.visible = $true
+    $notify.showballoontip(10, 'Disconnected from $wireguard_network tunnel', "Disconnected from the Wireguard tunnel since it was connected to both the home network and tunnel.", [system.windows.forms.tooltipicon]::None)
 }
 
 elseif (($home_network -NotIn $networks) -and ($wireguard_network -NotIn $networks)) {
