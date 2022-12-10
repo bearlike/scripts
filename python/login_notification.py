@@ -42,10 +42,11 @@ def get_key():
                     return response.json().get("value")
             except requests.exceptions.Timeout:
                 logging.warning(
-                    f"[{count+1}/{retries}] Timed-out so trying again.")
+                    "[%s/%s] Timed-out so trying again.", str(count+1), str(retries))
             except requests.ConnectionError as error:
                 logging.error(
-                    f"[{count+1}/{retries}] Connection error to SSM: {error}")
+                    "[%s/%s] Connection error to SSM: %s",
+                    str(count+1), str(retries), error)
         logging.error("Couldn't reach SSM. Halting!")
     return None
 
@@ -64,7 +65,7 @@ def send_notification(title, message, priority):
     secret = get_key()
     if secret is None:
         sys.exit(-1)
-    gotify_url = os.environ.get("GOTIFY_URL")    
+    gotify_url = os.environ.get("GOTIFY_URL")
     url = f"{gotify_url}/message?token={ secret }"
     head = {}
     data = {
@@ -78,16 +79,16 @@ def send_notification(title, message, priority):
         if response.status_code == 200:
             return True
     except requests.Timeout as error:
-        logging.error(f"Timed Out to Gotify: {error}")
+        logging.error("Timed Out to Gotify: %s", error)
     except requests.ConnectionError as error:
-        logging.error(f"Connection error to Gotify: {error}")
+        logging.error("Connection error to Gotify: %s", error)
     except Exception as error:
-        logging.error(f"{error}")
+        logging.error(f"%s", error)
     return False
 
 
 def main():
-    if platform == "linux" or platform == "linux2":
+    if platform in ["linux", "linux2"]:
         os_name = "linux"
     elif platform == "darwin":
         os_name = "OS X"
