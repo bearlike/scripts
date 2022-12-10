@@ -64,7 +64,7 @@ def send_notification(title, message, priority):
     secret = get_key()
     if secret is None:
         sys.exit(-1)
-    gotify_url = os.environ.get("GOTIFY_URL")    
+    gotify_url = os.environ.get("GOTIFY_URL")
     url = f"{gotify_url}/message?token={ secret }"
     head = {}
     data = {
