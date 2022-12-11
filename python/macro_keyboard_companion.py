@@ -37,7 +37,7 @@ def keebs_shortcut(s_key):
             keyboard.release(k)
     # skipcq: PYL-W0703
     except Exception as error:
-        logging.error(f"keebs_shortcut: {error}")
+        logging.error("keebs_shortcut: %s", error)
 
 
 def turn_off_tv():
@@ -65,7 +65,7 @@ def turn_off_tv():
         ssh.close()
     # skipcq: PYL-W0703
     except Exception as error:
-        logging.error(f"turn_off_tv (SSH): {error}")
+        logging.error("turn_off_tv (SSH): %s", error)
     # Using Home Assistant to turn off TV
     try:
         data = {"entity_id": "media_player.samsung_tv"}
@@ -77,7 +77,7 @@ def turn_off_tv():
         )
     # skipcq: PYL-W0703
     except Exception as error:
-        logging.error(f"turn_off_tv (TV): {error}")
+        logging.error("turn_off_tv (TV): %s", error)
 
 
 def win_run(cmd: str):
@@ -88,7 +88,7 @@ def win_run(cmd: str):
         system(cmd)
     # skipcq: PYL-W0703
     except Exception as error:
-        logging.error(f"win_run: {error}")
+        logging.error("win_run: %s", error)
 
 
 def main():
@@ -99,7 +99,7 @@ def main():
     elif sys.argv[1] == "off_tv":
         turn_off_tv()
     else:
-        logging.warning(f"'{sys.argv[1]}'' flag does not exist.")
+        logging.warning("'%s'' flag does not exist.", sys.argv[1])
 
 
 if __name__ == "__main__":

@@ -136,3 +136,4 @@ dmypy.json
 docs/~$scripts.xlsx
 
 powershell/wg_login_notification.ps1
+docs/templates/scripts.md.j2
