@@ -41,17 +41,21 @@ def run(
                         os.remove(file_path)
                         del_count += 1
                         del_size += file_size
-                        logging.debug(
-                            f"Deleted '{file_path}', Modified on \
+                        log_string = f"Deleted '{file_path}', Modified on \
                                 '{modified_time:%d-%m-%Y %H:%M}', of \
-                                    size '{file_size} bytes'")
+                                    size '{file_size} bytes'"
+                        logging.debug(log_string)
         logging.info(
-            f"Service finished. Deleted {del_count} files of {del_size} bytes")
+            "Service finished. Deleted %s files of %s bytes", 
+            str(del_count), str(del_size)
+        )
     # skipcq: PYL-W0703
     except Exception as _err:
-        logging.error(f"Service interrupted. {_err}")
+        logging.error("Service interrupted. %s", _err)
         logging.error(
-            f"Deleted {del_count} files of {del_size} bytes until error.")
+            "Deleted %s files of %s bytes until error.", 
+            str(del_count), str(del_size)
+        )
 
 
 if __name__ == "__main__":
