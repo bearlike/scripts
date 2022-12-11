@@ -29,22 +29,22 @@ STATUS=$(vcgencmd get_throttled)
 STATUS=${STATUS#*=}
 
 echo -n "Status: "
-(($STATUS != 0)) && echo "${RED}${STATUS}${NC}" || echo "${GREEN}${STATUS}${NC}"
+((STATUS != 0)) && echo "${RED}${STATUS}${NC}" || echo "${GREEN}${STATUS}${NC}"
 
 echo "Undervolted:"
 echo -n "   Now: "
-((($STATUS & UNDERVOLTED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & UNDERVOLTED) != 0)) && echo "${BAD}" || echo "${GOOD}"
 echo -n "   Run: "
-((($STATUS & HAS_UNDERVOLTED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & HAS_UNDERVOLTED) != 0)) && echo "${BAD}" || echo "${GOOD}"
 
 echo "Throttled:"
 echo -n "   Now: "
-((($STATUS & THROTTLED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & THROTTLED) != 0)) && echo "${BAD}" || echo "${GOOD}"
 echo -n "   Run: "
-((($STATUS & HAS_THROTTLED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & HAS_THROTTLED) != 0)) && echo "${BAD}" || echo "${GOOD}"
 
 echo "Frequency Capped:"
 echo -n "   Now: "
-((($STATUS & CAPPED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & CAPPED) != 0)) && echo "${BAD}" || echo "${GOOD}"
 echo -n "   Run: "
-((($STATUS & HAS_CAPPED) != 0)) && echo "${BAD}" || echo "${GOOD}"
+(((STATUS & HAS_CAPPED) != 0)) && echo "${BAD}" || echo "${GOOD}"
