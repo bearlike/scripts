@@ -46,14 +46,14 @@ def run(
                                     size '{file_size} bytes'"
                         logging.debug(log_string)
         logging.info(
-            "Service finished. Deleted %s files of %s bytes", 
+            "Service finished. Deleted %s files of %s bytes",
             str(del_count), str(del_size)
         )
     # skipcq: PYL-W0703
     except Exception as _err:
         logging.error("Service interrupted. %s", _err)
         logging.error(
-            "Deleted %s files of %s bytes until error.", 
+            "Deleted %s files of %s bytes until error.",
             str(del_count), str(del_size)
         )
 
