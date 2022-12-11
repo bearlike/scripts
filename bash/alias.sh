@@ -69,7 +69,7 @@ alias d-cl="docker system prune"
 
 # Stop all containers
 d-stop-all() {
-    docker stop $(docker ps -a -q); 
+    docker stop "$(docker ps -a -q)"; 
 }
 
 # Show all docker related aliases
@@ -80,21 +80,21 @@ d-alias() {
 # Bash into a running container
 # arg $1 : container name/id
 d-bash() { 
-    docker exec -it $1 bash;
+    docker exec -it "$1" bash;
 }
 
 : ' User aliases ends here. Below are helpers.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 # Helper: Text Formatting
-underline=$(tput smul)
-nounderline=$(tput rmul)
-bold=$(tput bold)
-normal=$(tput sgr0)
+underline=$(tput smul) # skipcq: SH-2034
+nounderline=$(tput rmul) # skipcq: SH-2034
+bold=$(tput bold) # skipcq: SH-2034
+normal=$(tput sgr0) # skipcq: SH-2034
 
 # Helper: function for alias index
 # arg $1 : Title
 # arg $2 : grep argument
 _guide_alias_() {
-    printf "${underline}${1} aliases${nounderline}\n\n";
-    alias | grep $2 | sed "s/^\([^=]*\)=\(.*\)/\1 \t=>   \2/" | sed "s/['|\']//g" | sort;
+    printf "%s%s aliases%s\n\n" "$underline" "$1" "$nounderline";
+    alias | grep "$2" | sed "s/^\([^=]*\)=\(.*\)/\1 \t=>   \2/" | sed "s/['|\']//g" | sort;
 } # skipcq: SH-1056
