@@ -1,0 +1,34 @@
+# Torrent from qBittorrent through the Tor network
+# Beware: It will be often dead slow
+
+version: '3'
+services:
+  tor:
+    container_name: tor-socks5
+    image: dperson/torproxy
+    restart: always
+    networks:
+      - tor_network
+      
+  # Follow the below link to connect qB to a socks5 proxy
+  # https://vpn.ac/knowledgebase/93/qBittorrent-SOCKS5-setup-instructions.html
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8080
+    volumes:
+      - /AppData/qbittorrent/config:/config
+      - /home/kk/Downloads/Torrents:/downloads
+    ports:
+      - 8080:8080
+    networks:
+      - tor_network
+    restart: unless-stopped
+
+networks:
+  tor_network:
+    driver: bridge
