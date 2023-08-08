@@ -6,6 +6,7 @@ import instaloader
 from dotenv import load_dotenv
 from os import getenv
 
+
 def login_instagram(username, password):
     """
     Function to log into Instagram using the instaloader library.
