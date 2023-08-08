@@ -1,0 +1,25 @@
+# This is Jellyfin docker-compose file with minor modifications
+# https://jellyfin.org/docs/general/installation/container/
+
+version: "3.5"
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    # network_mode: 'host'
+    volumes:
+      - /AppData/jellyfin/config:/config
+      - /AppData/jellyfin/cache:/cache
+      - /home/user/Videos:/media
+    ports:
+      - 8096:8096
+      - 8920:8920
+    restart: "unless-stopped"
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://media.example.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"

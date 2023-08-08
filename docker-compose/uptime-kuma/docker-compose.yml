@@ -1,0 +1,25 @@
+# This is for uptime-kuma
+# https://github.com/louislam/uptime-kuma/wiki/%F0%9F%94%A7-How-to-Install
+
+version: "3"
+services:
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: louislam/uptime-kuma:1
+    restart: always
+    ports:
+      - 3001:3001
+    # These are generic volumes, change them to your liking
+    volumes:
+      - /AppData/uptime-kuma:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      NODE_EXTRA_CA_CERTS: "/app/data/certs/keks_intra_ca.pem"
+    # These are generic DNS servers, change them to your liking
+    dns:
+      - 192.168.1.1
+      - 192.168.1.2
+      - 1.1.1.1
+
+volumes:
+  uptime-kuma:

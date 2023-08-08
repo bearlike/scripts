@@ -1,0 +1,59 @@
+# Route all container traffic through a VPN
+# Specifically configured for Surfshark with DNS over TLS
+# https://github.com/qdm12/gluetun
+version: "3"
+
+services:
+  gluetun:
+    container_name: gluetun
+    image: qmcgaw/gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+      - 8083:8080 # qbittorrent
+    volumes:
+      - /AppData/gluetun:/gluetun
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - VPN_SERVICE_PROVIDER=surfshark
+      - VPN_TYPE=openvpn
+      # OpenVPN:
+      - OPENVPN_USER=${OPENVPN_USER}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      # Timezone for accurate log times
+      - TZ=America/New_York
+      # Server list updater
+      - UPDATER_PERIOD=3h
+      - SERVER_HOSTNAMES=ca-tor.prod.surfshark.com,gl-goh.prod.surfshark.com,de-ber.prod.surfshark.com
+      - DOT=on
+      - DOT_PROVIDERS=cloudflare,google,quad9
+      - DOT_CACHING=on
+      - BLOCK_SURVEILLANCE=on
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8080
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    # Add your own volumes here
+    volumes:
+      - /AppData/qbittorrent/config:/config
+      - /home/user/Downloads/Torrents:/downloads
+      - /home/user/Videos:/videos
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped

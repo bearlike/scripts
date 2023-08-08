@@ -1,19 +1,23 @@
-version: '3'
+# Home Assistant with healthcheck and support for accessing host docker containers
+version: '3.7'
+
 services:
   homeassistant:
     container_name: homeassistant
-    hostname: "adam"
+    hostname: "Hostname"
     image: "homeassistant/home-assistant:stable"
     volumes:
       - /AppData/homeassistant:/config
+      - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - TZ=America/Indiana/Indianapolis
     restart: unless-stopped
     privileged: true
     network_mode: host
-    mem_limit: 1024M
-    cpus: 1
-
-networks:
-  nginx-proxy:
-    external: true
+    command: /bin/sh -c "apk update && apk add docker-cli && python3 -m homeassistant --config /config"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3

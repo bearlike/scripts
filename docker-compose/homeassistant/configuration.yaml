@@ -1,0 +1,28 @@
+# This is not a docker-compose file, it is a Home Assistant configuration file
+# https://www.home-assistant.io/docs/configuration/basic/
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+sensor:
+  - platform: command_line
+    name: qBittorrent Public IP
+    command: 'docker exec qbittorrent curl -s ifconfig.me'
+    scan_interval: 1800
+    # command: 'docker inspect -f "{{.State.Running}}" qb_qbittorrent | grep -q true && (docker exec qb_qbittorrent curl -s ifconfig.me) || echo ">    scan_interval: 1800
+
+# Trust the IP address of the reverse proxy
+# These are generic examples, make sure to update them with the IP address of your reverse proxy
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.1.11
+    - 192.168.1.12
