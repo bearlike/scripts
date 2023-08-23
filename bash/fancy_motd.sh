@@ -1,4 +1,5 @@
 #!/bin/bash
+# * Sample Output: https://i.imgur.com/dkQzkp5.jpg
 
 # Attempt to clear screen (may not work with MOTDs)
 /usr/bin/clear
@@ -6,8 +7,10 @@
 # Add padding
 echo -e ""
 
+# You need an image for this to work
 # Generate the image representation using chafa
-IMAGE_OUTPUT=$(chafa --size=50 /home/kk/KK.png)
+# * sudo apt install -y chafa
+IMAGE_OUTPUT=$(chafa --size=50 /home/user/logo.png)
 
 # Split the image output into an array of lines
 IFS=$'\n' read -rd '' -a IMAGE_LINES <<< "$IMAGE_OUTPUT"

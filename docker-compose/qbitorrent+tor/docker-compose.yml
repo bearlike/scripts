@@ -1,8 +1,16 @@
-# Torrent from qBittorrent through the Tor network
+# Torrent from qBittorrent through the Tor network (not recommended)
+# If you can, use qbittorrent+gluetun instead.
 # Beware: It will be often dead slow
 
-# Purely for educational purposes and not intended for illegal use
-# 
+# Purely for educational purposes and not intended for illegal use.
+
+# ! Why should we not use Tor for torrenting?
+# * Torrenting via Tor strains limited bandwidth, degrading performance for others. 
+# *   Torrent clients can leak your real IP, compromising anonymity. 
+# *   Tor exit nodes face legal risks from torrent traffic. 
+# *   Tor isn't optimized for high-bandwidth tasks like torrenting. 
+# *   Some exit nodes block BitTorrent due to these issues.
+# *   Not to mention, they don't support UDP, which is required for DHT and PEX. 
 
 version: '3'
 services:
