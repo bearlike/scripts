@@ -13,6 +13,7 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 
 sensor:
+  # The below sensor is if you are using the qbittorrent+gluetun stack.
   - platform: command_line
     name: qBittorrent Public IP
     command: 'docker exec qbittorrent curl -s ifconfig.me'
