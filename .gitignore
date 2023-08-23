@@ -138,3 +138,4 @@ docs/~$scripts.xlsx
 powershell/wg_login_notification.ps1
 docs/templates/scripts.md.j2
 powershell/connect_to_right_ssh.ps1
+powershell/connect_hurricane.ps1
