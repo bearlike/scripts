@@ -1,6 +1,8 @@
 # Route all container traffic through a VPN
 # Specifically configured for Surfshark with DNS over TLS
+# Purely for educational purposes and not intended for illegal use
 # https://github.com/qdm12/gluetun
+
 version: "3"
 
 services:

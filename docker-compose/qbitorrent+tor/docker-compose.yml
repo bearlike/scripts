@@ -1,6 +1,9 @@
 # Torrent from qBittorrent through the Tor network
 # Beware: It will be often dead slow
 
+# Purely for educational purposes and not intended for illegal use
+# 
+
 version: '3'
 services:
   tor:
@@ -22,7 +25,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - /AppData/qbittorrent/config:/config
-      - /home/kk/Downloads/Torrents:/downloads
+      - /home/user/Downloads/Torrents:/downloads
     ports:
       - 8080:8080
     networks:
