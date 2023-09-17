@@ -2,10 +2,7 @@
 # Specifically, this is configured to my liking
 # Volumes and Variables are not generic, so change them to your liking
 
-version: "3"
-
-volumes:
-  nextcloud:
+version: '3'
 
 services:
   mariadb:
@@ -22,33 +19,49 @@ services:
       MYSQL_DATABASE: nextcloud
       MYSQL_USER: nextcloud
 
+  redis:
+    image: redis
+    hostname: redis
+    restart: always
+    command: redis-server --loglevel warning --save 20 1 --requirepass ${DB_PASSWORD} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes: 
+      - cache:/data
+
   app:
-    image: nextcloud:26
-    hostname: hostname
+    image: nextcloud:27
+    hostname: Hurricane
     restart: always
     ports:
       - "8080:80"
     volumes:
-      # This is for Preview Generator and Recognize
       - type: tmpfs
         target: /tmp:exec
       - /AppData/nextcloud/html/:/var/www/html
       - /AppData/nextcloud/data:/srv/nextcloud/data
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=false 
     environment:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: nextcloud
       MYSQL_USER: nextcloud
       MYSQL_HOST: mariadb
       PHP_MEMORY_LIMIT: 1024M
+      REDIS_HOST: redis
+      REDIS_HOST_PASSWORD: ${DB_PASSWORD}
     # Install Imagick and start nextcloud
     command: >
-      bash -c "apt-get update
-      && DEBIAN_FRONTEND=noninteractive apt-get install -yq libmagickcore-6.q16-6-extra nano
-      && DEBIAN_FRONTEND=noninteractive apt-get clean
-      && rm -rf /var/lib/apt/lists/*
-      && apache2-foreground"
+        bash -c "apt-get update
+        && DEBIAN_FRONTEND=noninteractive apt-get install -yq libmagickcore-6.q16-6-extra nano
+        && DEBIAN_FRONTEND=noninteractive apt-get clean
+        && rm -rf /var/lib/apt/lists/*
+        && apache2-foreground"
+    depends_on:
+      - mariadb
+      - redis
+
+volumes:
+  cache:
+    driver: local
 
 networks:
   default:
