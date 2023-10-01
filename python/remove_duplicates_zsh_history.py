@@ -14,8 +14,8 @@ def remove_duplicates_from_history_file(path):
     for line in lines:
         command = line.split(";")[-1]
         commands.add(command)
-        
-    # TODO: Messes up the order of commands (timestamps) 
+
+    # TODO: Messes up the order of commands (timestamps)
     with open(path, "w") as file:
         begin = 1600000000
         for command in commands:
@@ -23,6 +23,7 @@ def remove_duplicates_from_history_file(path):
                 continue
             file.write(f": { begin }:0;"+command)
             begin += 1
+
 
 if __name__ == "__main__":
     history_path = "/home/user/.zsh_history"
