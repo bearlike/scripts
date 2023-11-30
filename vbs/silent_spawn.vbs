@@ -1,3 +1,5 @@
+' wscript.exe "path\to\silent_spawn.vbs" powershell.exe -ExecutionPolicy Bypass -File "path\to\your\script.ps1"
+
 On Error Resume Next
 
 ReDim args(WScript.Arguments.Count-1)

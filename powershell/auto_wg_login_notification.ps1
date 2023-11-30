@@ -22,4 +22,4 @@ elseif (($home_network -NotIn $networks) -and ($wireguard_network -NotIn $networ
 }
 
 # Send login notification via Gotify
-Start-Process "C:\Program Files\Python310\python.exe" -ArgumentList "$Env:PROJECTS\Automations\Scripts\python\login_notification.py" -Wait -NoNewWindow -PassThru | Out-Null
+Start-Process "C:\Program Files\Python311\python.exe" -ArgumentList "$Env:PROJECTS\Automations\Scripts\python\login_notification.py" -Wait -NoNewWindow -PassThru | Out-Null
