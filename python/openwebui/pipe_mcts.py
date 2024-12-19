@@ -127,7 +127,8 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
+            logger.error(
+                f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
 
 
 # =============================================================================
@@ -277,7 +278,8 @@ class MCTSAgent:
         return await self.generate_completion(prompt)
 
     async def evaluate_answer(self, answer: str):
-        prompt = eval_answer_prompt.format(question=self.question, answer=answer)
+        prompt = eval_answer_prompt.format(
+            question=self.question, answer=answer)
         result = await self.generate_completion(prompt)
         try:
             score = int(re.search(r"\d+", result).group())
@@ -397,8 +399,10 @@ class Pipe:
         USE_OPENAI: bool = Field(
             default=True, description="Whether to use OpenAI endpoints"
         )
-        LANGFUSE_SECRET_KEY: str = Field(default="", description="Langfuse secret key")
-        LANGFUSE_PUBLIC_KEY: str = Field(default="", description="Langfuse public key")
+        LANGFUSE_SECRET_KEY: str = Field(
+            default="", description="Langfuse secret key")
+        LANGFUSE_PUBLIC_KEY: str = Field(
+            default="", description="Langfuse public key")
         LANGFUSE_URL: str = Field(default="", description="Langfuse URL")
         EXPLORATION_WEIGHT: float = Field(
             default=1.414, description="Exploration weight for MCTS"
@@ -484,7 +488,8 @@ class Pipe:
         if match:
             backend, model_name = match.groups()
         else:
-            logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
+            logger.error(
+                "Model ID should be in the format '*.mcts/backend/model_name'")
             logger.error(f"Invalid model ID: {model_id}")
             return ""
 
@@ -503,7 +508,8 @@ class Pipe:
 
         # Handle title generation task
         if __task__ == TASKS.TITLE_GENERATION:
-            logger.debug(f"Generating title for question: {question} using {self.model} and {self.backend}")
+            logger.debug(
+                f"Generating title for question: {question} using {self.model} and {self.backend}")
             content = await self.llm_client.get_completion(
                 messages, self.model, backend=self.backend
             )
