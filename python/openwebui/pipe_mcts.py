@@ -29,13 +29,13 @@ from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import AsyncCallbackHandler
 from langchain.schema import AIMessage, HumanMessage, BaseMessage
 
+
 from pydantic import BaseModel, Field
 
 from open_webui.constants import TASKS
 from open_webui.apps.ollama import main as ollama
 
 # * Patch for user-id missing in the request
-
 from types import SimpleNamespace
 
 # Import Langfuse for logging/tracing (optional)
@@ -63,6 +63,7 @@ if not logger.handlers:
 
 # =============================================================================
 
+
 class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
     def __init__(self):
         self.queue = asyncio.Queue()
@@ -86,11 +87,13 @@ class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
                 break
             yield token
 
+
 class LLMClient:
-    def __init__(self, valves: "Pipe.Valves"):
+    def __init__(self, valves: "Pipe.Valves", user_mod=None):
         self.openai_api_key = valves.OPENAI_API_KEY
         self.openai_api_base_url = valves.OPENAI_API_BASE_URL
         self.ollama_api_base_url = valves.OLLAMA_API_BASE_URL
+        self.__user__ = user_mod
 
     async def create_chat_completion(
         self, messages: list, model: str, backend: str, stream: bool = False
@@ -132,7 +135,8 @@ class LLMClient:
                 return ai_message.content
         elif backend == "ollama":
             response = await ollama.generate_openai_chat_completion(
-                {"model": model, "messages": messages, "stream": stream}
+                {"model": model, "messages": messages, "stream": stream},
+                user=self.__user__,
             )
             return response
         else:
@@ -184,9 +188,11 @@ class LLMClient:
         except json.JSONDecodeError:
             logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
 
+
 # =============================================================================
 
 # MCTS Classes
+
 
 class Node:
     def __init__(
@@ -239,6 +245,7 @@ class Node:
 
         logger.debug(f"Node Mermaid:\n{msg}")
         return msg
+
 
 class MCTSAgent:
     def __init__(
@@ -483,6 +490,7 @@ class MCTSAgent:
         if self.event_emitter:
             await self.event_emitter({"type": "replace", "data": {"content": content}})
 
+
 # =============================================================================
 
 # Prompts
@@ -543,33 +551,32 @@ Answer the question below. Do not pay attention to unexpected casing, punctuatio
 
 # =============================================================================
 
+# Pipe Class
+
 
 class Pipe:
     class Valves(BaseModel):
         # ! FIX: User Provided Valves not being used. Only defaults used.
         # Manually set the default values for the valves
         OPENAI_API_KEY: str = Field(
-            default="sk-CHANGE-ME", description="OpenAI API key"
+            default="sk-Change-Me", description="OpenAI API key"
         )
         OPENAI_API_BASE_URL: str = Field(
             default="http://litellm:4000/v1", description="OpenAI API base URL"
         )
         OLLAMA_API_BASE_URL: str = Field(
-            default="http://avalanche.lan:11434", description="Ollama API base URL"
-        )
-        USE_OPENAI: bool = Field(
-            default=True, description="Whether to use OpenAI endpoints"
+            default="http://ollama.lan:11434", description="Ollama API base URL"
         )
         LANGFUSE_SECRET_KEY: str = Field(
-            default="sk-change-me",
+            default="sk-Change-Me",
             description="Langfuse secret key",
         )
         LANGFUSE_PUBLIC_KEY: str = Field(
-            default="pk-change-me",
+            default="pk-Change-Me",
             description="Langfuse public key",
         )
         LANGFUSE_URL: str = Field(
-            default="<http://langfuse-server:3000>", description="Langfuse URL"
+            default="http://langfuse-server:3000", description="Langfuse URL"
         )
         EXPLORATION_WEIGHT: float = Field(
             default=1.414, description="Exploration weight for MCTS"
@@ -584,7 +591,7 @@ class Pipe:
             default=2, description="Maximum number of children per node in MCTS"
         )
         OLLAMA_MODELS: str = Field(
-            default="Ollama/.tulu3:8b,Ollama/.llama3.2-vision:11b",
+            default="Ollama/Avalanche/.tulu3:8b,Ollama/Avalanche/.llama3.2-vision:11b",
             description="Comma-separated list of Ollama model IDs",
         )
         OPENAI_MODELS: str = Field(
@@ -616,29 +623,36 @@ class Pipe:
             )
 
     def pipes(self) -> List[dict]:
-        # Hardcode models from valves
-        if self.valves.USE_OPENAI:
-            openai_models_str = self.valves.OPENAI_MODELS
+        # Collect models from both OpenAI and Ollama
+        model_list = []
+
+        # Get OpenAI models
+        openai_models_str = self.valves.OPENAI_MODELS
+        if openai_models_str:
             openai_models = [
                 model.strip() for model in openai_models_str.split(",") if model.strip()
             ]
-            model_list = [
+            openai_model_list = [
                 {"id": f"mcts/openai/{model}", "name": f"MCTS/{model}"}
                 for model in openai_models
             ]
-            logger.debug(f"Available OpenAI models: {model_list}")
-            return model_list
-        else:
-            ollama_models_str = self.valves.OLLAMA_MODELS
+            logger.debug(f"Available OpenAI models: {openai_model_list}")
+            model_list.extend(openai_model_list)
+
+        # Get Ollama models
+        ollama_models_str = self.valves.OLLAMA_MODELS
+        if ollama_models_str:
             ollama_models = [
                 model.strip() for model in ollama_models_str.split(",") if model.strip()
             ]
-            model_list = [
+            ollama_model_list = [
                 {"id": f"mcts/ollama/{model}", "name": f"MCTS/{model}"}
                 for model in ollama_models
             ]
-            logger.debug(f"Available Ollama models: {model_list}")
-            return model_list
+            logger.debug(f"Available Ollama models: {ollama_model_list}")
+            model_list.extend(ollama_model_list)
+
+        return model_list
 
     async def pipe(
         self,
@@ -664,6 +678,13 @@ class Pipe:
 
         self.backend = backend
         self.model = model_name
+        # To ensure __user__ is an object with 'id' and 'role' attributes
+        if __user__ is None or not isinstance(__user__, dict):
+            self.__user__ = SimpleNamespace(id=None, role="admin")
+        else:
+            self.__user__ = SimpleNamespace(**__user__)
+
+        self.llm_client.__user__ = self.__user__
 
         messages = body.get("messages")
         if not messages:
@@ -707,4 +728,5 @@ class Pipe:
 
         # Run MCTS search
         best_answer = await mcts_agent.search()
+
         return ""
