@@ -63,6 +63,7 @@ if not logger.handlers:
 
 # =============================================================================
 
+
 class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
     def __init__(self):
         self.queue = asyncio.Queue()
@@ -85,6 +86,7 @@ class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
             if token is None:
                 break
             yield token
+
 
 class LLMClient:
     def __init__(self, valves: "Pipe.Valves"):
@@ -182,11 +184,13 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
+            logger.error(
+                f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
 
 # =============================================================================
 
 # MCTS Classes
+
 
 class Node:
     def __init__(
@@ -239,6 +243,7 @@ class Node:
 
         logger.debug(f"Node Mermaid:\n{msg}")
         return msg
+
 
 class MCTSAgent:
     def __init__(
@@ -434,7 +439,8 @@ class MCTSAgent:
         return await self.generate_completion(prompt)
 
     async def evaluate_answer(self, answer: str):
-        prompt = eval_answer_prompt.format(question=self.question, answer=answer)
+        prompt = eval_answer_prompt.format(
+            question=self.question, answer=answer)
         result = await self.generate_completion(prompt)
         try:
             score = int(re.search(r"\d+", result).group())
@@ -486,6 +492,7 @@ class MCTSAgent:
 # =============================================================================
 
 # Prompts
+
 
 thoughts_prompt = """
 <instruction>
@@ -658,7 +665,8 @@ class Pipe:
         if match:
             backend, model_name = match.groups()
         else:
-            logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
+            logger.error(
+                "Model ID should be in the format '*.mcts/backend/model_name'")
             logger.error(f"Invalid model ID: {model_id}")
             return ""
 
