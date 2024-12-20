@@ -192,7 +192,8 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
+            logger.error(
+                f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
 
 
 class Node:
@@ -675,7 +676,8 @@ class Pipe:
         if match:
             backend, model_name = match.groups()
         else:
-            logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
+            logger.error(
+                "Model ID should be in the format '*.mcts/backend/model_name'")
             logger.error(f"Invalid model ID: {model_id}")
             return ""
 
