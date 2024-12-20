@@ -498,6 +498,14 @@ class MCTSAgent:
 class MCTSPromptTemplates:
     """Class to store prompt templates for MCTS interactions"""
 
+    thread_prompt = """
+    ## Latest Question
+    {question}
+
+    ## Previous Messages
+    {messages}
+    """
+
     thoughts_prompt = """
     <instruction>
     In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
@@ -682,10 +690,19 @@ class Pipe:
             logger.error("No messages found in the request")
             return ""
 
-        question = messages[-1].get("content", "").strip()
-        if not question:
+        latest_user_query = messages[-1].get("content", "").strip()
+        if not latest_user_query:
             logger.error("No question found in the messages")
             return ""
+
+        previous_messages = "\n".join([
+            f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+            for msg in messages[:-1]
+        ]) if len(messages) > 1 else ""
+
+        question = MCTSPromptTemplates.thread_prompt.format(
+            question=latest_user_query, messages=previous_messages
+        )
 
         # Handle title generation task
         if __task__ == TASKS.TITLE_GENERATION:
