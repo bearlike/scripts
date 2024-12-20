@@ -5,6 +5,7 @@
 # Makes zsh-autosuggestions much better
 # This script is to be run in a cron job
 
+
 def remove_duplicates_from_history_file(path):
     commands = set()
 
@@ -21,12 +22,10 @@ def remove_duplicates_from_history_file(path):
         for command in commands:
             if command in ["\n", "", " ", None]:
                 continue
-            file.write(f": { begin }:0;"+command)
+            file.write(f": { begin }:0;" + command)
             begin += 1
 
 
 if __name__ == "__main__":
     history_path = "/home/user/.zsh_history"
-    remove_duplicates_from_history_file(
-        path=history_path
-    )
+    remove_duplicates_from_history_file(path=history_path)

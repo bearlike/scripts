@@ -26,9 +26,9 @@ def find_loop_point(video_path):
     :return: Time in seconds where the loop starts or None if not found.
 
     Important Considerations:
-    - Accuracy: This method might not be highly accurate if the looped content has slight variations 
+    - Accuracy: This method might not be highly accurate if the looped content has slight variations
       or if the video quality is low.
-    - Performance: The script can be slow for long videos. Consider increasing the interval between 
+    - Performance: The script can be slow for long videos. Consider increasing the interval between
       frames to improve performance, but this may reduce accuracy.
     - Threshold Adjustments: The similarity threshold may need to be adjusted based on specific video content.
     """

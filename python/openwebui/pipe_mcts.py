@@ -1,6 +1,6 @@
 """
 title: MCTS Answer Generation Pipe
-description: Monte Carlo Tree Search Pipe Addon for OpenWebUI with support for OpenAI and Ollama endpoints.
+description: Monte Carlo Tree Search Pipe for OpenWebUI (OpenAI and Ollama).
 author: https://github.com/bearlike/scripts
 requirements: langchain-openai, langfuse, pydantic
 version: 1.0.0
@@ -12,6 +12,7 @@ import random
 import math
 import json
 import re
+import os
 
 # * Patch for user-id missing in the request
 from types import SimpleNamespace
@@ -66,19 +67,22 @@ class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
         self.done = True
         await self.queue.put(None)  # Signal completion
 
+    # skipcq: PTC-W0045
     async def __aiter__(self):
         while not self.done:
             token = await self.queue.get()
             if token is None:
                 break
+            # skipcq: PTC-W0059
             yield token
 
 
 class LLMClient:
     def __init__(self, valves: "Pipe.Valves", user_mod=None):
-        logger.debug(f"Valves configuration: {valves}")
+        logger.debug("Valves configuration: %s", valves)
         self.valves = valves
         self.__user__ = user_mod
+        self.langfuse_handler = None
 
     async def create_chat_completion(
         self, messages: list, model: str, backend: str, stream: bool = False
@@ -100,12 +104,15 @@ class LLMClient:
                     public_key=self.valves.LANGFUSE_PUBLIC_KEY,
                     host=self.valves.LANGFUSE_URL,
                     tags=["mcts", "openwebui"],
-                    session_id=self.valves._session_id,
+                    # skipcq: PYL-W0212
+                    session_id=self.valves.session_id,
                 )
                 logger.debug("Using Langfuse for logging")
 
+            # skipcq: PYL-R1705, PYL-R1705
             if stream:
                 # Create a callback handler to capture streamed tokens
+                # skipcq: PYL-W0621
                 handler = AsyncIteratorCallbackHandler()
 
                 oai_model = ChatOpenAI(
@@ -174,6 +181,7 @@ class LLMClient:
             content = response["choices"][0]["message"]["content"]
         return content
 
+    # skipcq: PYL-R0201
     def get_chunk_content(self, chunk):
         # For Ollama only
         chunk_str = chunk.decode("utf-8")
@@ -192,7 +200,7 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
+            logger.error('ChunkDecodeError: unable to parse "%s"', chunk_str[:100])
 
 
 class Node:
@@ -220,6 +228,7 @@ class Node:
         return len(self.children) >= self.max_children
 
     def uct_value(self):
+        # skipcq: PY-W0069
         # epsilon = 1e-6
         if self.visits == 0:
             return float("inf")
@@ -244,7 +253,7 @@ class Node:
             msg += child.mermaid(offset + 4, selected)
             msg += f"{padding}{self.id} --> {child.id}\n"
 
-        logger.debug(f"Node Mermaid:\n{msg}")
+        logger.debug("Node Mermaid:\n%s", msg)
         return msg
 
 
@@ -269,7 +278,10 @@ class MCTSAgent:
         self.backend = backend
         self.iteration_responses = []  # List to store responses per iteration
 
-    async def search(self):
+    async def search(self, valves: Optional["Pipe.Valves"] = None):
+        if valves:
+            self.valves = valves
+
         max_iterations = self.valves.MAX_ITERATIONS
         max_simulations = self.valves.MAX_SIMULATIONS
         best_answer = None
@@ -301,7 +313,7 @@ class MCTSAgent:
         await self.emit_iteration_update(0)
 
         for i in range(1, max_iterations + 1):
-            logger.debug(f"MCTS Iteration {i}/{max_iterations}")
+            logger.debug("MCTS Iteration %d/%d", i, max_iterations)
             await self.progress(f"Iteration {i}/{max_iterations}")
 
             iteration_responses = []  # Responses for this iteration
@@ -340,7 +352,7 @@ class MCTSAgent:
                         # Do nothing if leaf has been processed or is the root node
                         continue
 
-            # Add the iteration responses to the overall list if there are any new responses
+            # Add the iteration responses to the overall list if new responses
             if iteration_responses:
                 self.iteration_responses.append(
                     {
@@ -364,7 +376,7 @@ class MCTSAgent:
                 best_answer = current_best.content
 
         await self.emit_message(f"## Best Answer:\n{best_answer}")
-        await self.done()
+        await self.done(session_id=self.valves.session_id)
         return best_answer
 
     async def emit_iteration_update(self, iteration_number):
@@ -403,6 +415,14 @@ class MCTSAgent:
         return content
 
     async def select(self, node: Node):
+        """
+        Selects a promising node for exploration based on UCT value.
+        Args:
+            node (Node): Starting node in the tree.
+        Returns:
+            Node: Selected node after traversing down the tree using UCT selection.
+        """
+
         while node.fully_expanded() and node.children:
             node = max(node.children, key=lambda n: n.uct_value())
         return node
@@ -424,6 +444,7 @@ class MCTSAgent:
         score = await self.evaluate_answer(node.content)
         return score
 
+    # skipcq: PYL-R0201
     def backpropagate(self, node: Node, score: float):
         while node is not None:
             node.visits += 1
@@ -452,13 +473,13 @@ class MCTSAgent:
             score = int(re.search(r"\d+", result).group())
             return score
         except Exception as e:
-            logger.error(f"Failed to parse score from result: {result} - {e}")
+            logger.error("Failed to parse score from result: %s - %s", result, e)
             return 0
 
     async def generate_completion(self, prompt: str):
         messages = [{"role": "user", "content": prompt}]
         content = ""
-        logger.debug(f"Attempting to stream completion for prompt: {prompt}")
+        logger.debug("Attempting to stream completion for prompt: %s", prompt)
         async for chunk in self.llm_client.get_streaming_completion(
             messages, model=self.model, backend=self.backend
         ):
@@ -470,8 +491,10 @@ class MCTSAgent:
     async def progress(self, message: str):
         await self.emit_status("info", message, False)
 
-    async def done(self):
-        await self.emit_status("info", "Done", True)
+    async def done(self, session_id: Optional[str] = None):
+        done_message = "MCTS search completed - [Langfuse Logs]"
+        done_message += f"({self.valves.LANGFUSE_URL_PREFIX}/{session_id})"
+        await self.emit_status("info", done_message, True)
 
     async def emit_message(self, message: str):
         if self.event_emitter:
@@ -509,7 +532,9 @@ class MCTSPromptTemplates:
 
     thoughts_prompt = """
 <instruction>
-In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
+In one sentence, provide a specific suggestion to improve the answer's
+accuracy, completeness, or clarity. Do not repeat previous suggestions or
+include any additional content.
 </instruction>
 
 <question>
@@ -523,7 +548,8 @@ In one sentence, provide a specific suggestion to improve the answer's accuracy,
 
     update_prompt = """
 <instruction>
-Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
+Revise the answer below to address the critique and improve its quality.
+Provide only the updated answer without any extra explanation or repetition.
 </instruction>
 
 <question>
@@ -541,7 +567,8 @@ Revise the answer below to address the critique and improve its quality. Provide
 
     eval_answer_prompt = """
 <instruction>
-Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
+Evaluate how well the answer responds to the question. Use the following scale
+and reply with a single number only:
 
 - **1**: Completely incorrect or irrelevant.
 - **5**: Partially correct but incomplete or unclear.
@@ -561,7 +588,9 @@ Do not include any additional text.
 
     initial_prompt = """
 <instruction>
-Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
+Provide a clear, accurate, and complete answer to the question below. Consider
+different perspectives and avoid repeating common answers. Ignore any
+unexpected casing, punctuation, or accent marks.
 </instruction>
 
 <question>
@@ -571,6 +600,7 @@ Provide a clear, accurate, and complete answer to the question below. Consider d
 
 
 class Pipe:
+
     class Valves(BaseModel):
         # ! FIX: User Provided Valves not being used. Only defaults used.
         # Manually set the default values for the valves
@@ -581,14 +611,14 @@ class Pipe:
             default="http://litellm:4000/v1", description="OpenAI API base URL"
         )
         OLLAMA_API_BASE_URL: Optional[str] = Field(
-            default="http://ollama.lan:11434", description="Ollama API base URL"
+            default="http://avalanche.lan:11434", description="Ollama API base URL"
         )
         LANGFUSE_SECRET_KEY: Optional[str] = Field(
-            default="sk-Change-Me",
+            default="sk-lf-Change-Me",
             description="Langfuse secret key",
         )
         LANGFUSE_PUBLIC_KEY: Optional[str] = Field(
-            default="pk-Change-Me",
+            default="pk-lf-Change-Me",
             description="Langfuse public key",
         )
         LANGFUSE_URL: Optional[str] = Field(
@@ -611,19 +641,29 @@ class Pipe:
             description="Comma-separated list of Ollama model IDs",
         )
         OPENAI_MODELS: Optional[str] = Field(
-            default="openai/gpt-4o,openai/gpt-4o-mini",
+            default="openai/gpt-4o,openai/gpt-4o-mini,google/gemini-2.0-flash-exp",
             description="Comma-separated list of OpenAI model IDs",
         )
+        LANGFUSE_URL_PREFIX: Optional[str] = Field(
+            default="http://langfuse-server:3000/project/PROJECT_ID/sessions",
+            description="Langfuse URL prefix for session trace",
+        )
+        session_id: Optional[str] = None
 
     def __init__(self):
         self.type = "manifold"
         self.valves = self.Valves()
-        self.valves._session_id = "".join(
-            random.choices("abcdefghijklmnopqrstuvwxyz", k=5)
-        )
-        logger.debug(f"Valves configuration: {self.valves}")
+        self.valves.session_id = None
+        if not self.valves.session_id:
+            self.valves.session_id = "".join(
+                random.choices("abcdefghijklmnopqrstuvwxyz", k=5)
+            )
+            os.environ["MCTS_SESSION_ID"] = self.valves.session_id
+        logger.debug("Valves configuration: %s", self.valves)
         self.llm_client = LLMClient(self.valves)
         self.langfuse_handler = None
+        self.backend = None
+        self.model = None
 
     def pipes(self) -> List[dict]:
         # Collect models from both OpenAI and Ollama
@@ -639,7 +679,7 @@ class Pipe:
                 {"id": f"mcts/openai/{model}", "name": f"MCTS/{model}"}
                 for model in openai_models
             ]
-            logger.debug(f"Available OpenAI models: {openai_model_list}")
+            logger.debug("Available OpenAI models: %s", openai_model_list)
             model_list.extend(openai_model_list)
 
         # Get Ollama models
@@ -652,7 +692,7 @@ class Pipe:
                 {"id": f"mcts/ollama/{model}", "name": f"MCTS/{model}"}
                 for model in ollama_models
             ]
-            logger.debug(f"Available Ollama models: {ollama_model_list}")
+            logger.debug("Available Ollama models: %s", ollama_model_list)
             model_list.extend(ollama_model_list)
 
         return model_list
@@ -676,15 +716,21 @@ class Pipe:
             backend, model_name = match.groups()
         else:
             logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
-            logger.error(f"Invalid model ID: {model_id}")
+            logger.error("Invalid model ID: %s", model_id)
             return ""
 
         self.backend = backend
         self.model = model_name
+
+        if not self.valves.session_id and "MCTS_SESSION_ID" in os.environ:
+            self.valves.session_id = os.environ["MCTS_SESSION_ID"]
+
         # To ensure __user__ is an object with 'id' and 'role' attributes
         if __user__ is None or not isinstance(__user__, dict):
+            # skipcq: PYL-W0201
             self.__user__ = SimpleNamespace(id=None, role="admin")
         else:
+            # skipcq: PYL-W0201
             self.__user__ = SimpleNamespace(**__user__)
 
         self.llm_client.__user__ = self.__user__
@@ -699,10 +745,16 @@ class Pipe:
             logger.error("No question found in the messages")
             return ""
 
-        previous_messages = "\n".join([
-            f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
-            for msg in messages[:-1]
-        ]) if len(messages) > 1 else ""
+        previous_messages = (
+            "\n".join(
+                [
+                    f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+                    for msg in messages[:-1]
+                ]
+            )
+            if len(messages) > 1
+            else ""
+        )
 
         question = MCTSPromptTemplates.thread_prompt.format(
             question=latest_user_query, messages=previous_messages
@@ -710,10 +762,8 @@ class Pipe:
 
         # Handle title generation task
         if __task__ == TASKS.TITLE_GENERATION:
-            # return f"MCTS: {messages[0]['content']}"
-            logger.debug(
-                f"Generating title for question: {question} using {self.model} and {self.backend}"
-            )
+            logger.debug("Generating title for question: %s", question)
+            logger.debug("Model: %s, Backend: %s", self.model, self.backend)
             content = await self.llm_client.get_completion(
                 messages, self.model, backend=self.backend
             )
@@ -741,6 +791,6 @@ class Pipe:
         )
 
         # Run MCTS search
-        _ = await mcts_agent.search()
+        _ = await mcts_agent.search(valves=self.valves)
 
         return ""

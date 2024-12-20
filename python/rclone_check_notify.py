@@ -43,8 +43,7 @@ def send_notification(title, message, priority):
 def run_command(command):
     try:
         # Run the command
-        result = subprocess.run(
-            command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True)
 
         # Return the output or error based on the execution result
         if result.returncode == 0:
@@ -61,7 +60,9 @@ def check_rclone_and_fuse():
     rclone_output = run_command(rclone_command)
 
     # Pattern to match rclone output
-    pattern = r"Total:\s+\S+\s+Used:\s+\S+\s+Free:\s+\S+\s+Trashed:\s+\S+\s+Other:\s+\S+"
+    pattern = (
+        r"Total:\s+\S+\s+Used:\s+\S+\s+Free:\s+\S+\s+Trashed:\s+\S+\s+Other:\s+\S+"
+    )
     if "Error:" in rclone_output or not re.match(pattern, rclone_output):
         return False, "Rclone check failed: " + rclone_output
 
@@ -69,7 +70,7 @@ def check_rclone_and_fuse():
     fuse_command = "df -P -T /media_files/gdrive | tail -n +2 | awk '{print $2}'"
     fuse_output = run_command(fuse_command)
     if fuse_output != "fuse.rclone":
-        return False,  "FUSE check failed: Unexpected filesystem type: " + fuse_output
+        return False, "FUSE check failed: Unexpected filesystem type: " + fuse_output
 
     # Check the status of 'drivemount.service'
     service_command = "sudo systemctl is-active --quiet drivemount.service && echo True"
