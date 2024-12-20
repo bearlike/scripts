@@ -100,6 +100,7 @@ class LLMClient:
                     public_key=self.valves.LANGFUSE_PUBLIC_KEY,
                     host=self.valves.LANGFUSE_URL,
                     tags=["mcts", "openwebui"],
+                    session_id=self.valves._session_id,
                 )
                 logger.debug("Using Langfuse for logging")
 
@@ -219,7 +220,7 @@ class Node:
         return len(self.children) >= self.max_children
 
     def uct_value(self):
-        epsilon = 1e-6
+        # epsilon = 1e-6
         if self.visits == 0:
             return float("inf")
         return self.value / self.visits + self.exploration_weight * math.sqrt(
@@ -499,73 +500,73 @@ class MCTSPromptTemplates:
     """Class to store prompt templates for MCTS interactions"""
 
     thread_prompt = """
-    ## Latest Question
-    {question}
+## Latest Question
+{question}
 
-    ## Previous Messages
-    {messages}
+## Previous Messages
+{messages}
     """
 
     thoughts_prompt = """
-    <instruction>
-    In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
-    </instruction>
+<instruction>
+In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
+</instruction>
 
-    <question>
-    {question}
-    </question>
+<question>
+{question}
+</question>
 
-    <draft>
-    {answer}
-    </draft>
+<draft>
+{answer}
+</draft>
     """
 
     update_prompt = """
-    <instruction>
-    Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
-    </instruction>
+<instruction>
+Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
+</instruction>
 
-    <question>
-    {question}
-    </question>
+<question>
+{question}
+</question>
 
-    <draft>
-    {answer}
-    </draft>
+<draft>
+{answer}
+</draft>
 
-    <critique>
-    {critique}
-    </critique>
+<critique>
+{critique}
+</critique>
     """
 
     eval_answer_prompt = """
-    <instruction>
-    Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
+<instruction>
+Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
 
-    - **1**: Completely incorrect or irrelevant.
-    - **5**: Partially correct but incomplete or unclear.
-    - **10**: Fully correct, comprehensive, and clear.
+- **1**: Completely incorrect or irrelevant.
+- **5**: Partially correct but incomplete or unclear.
+- **10**: Fully correct, comprehensive, and clear.
 
-    Do not include any additional text.
-    </instruction>
+Do not include any additional text.
+</instruction>
 
-    <question>
-    {question}
-    </question>
+<question>
+{question}
+</question>
 
-    <answer>
-    {answer}
-    </answer>
+<answer>
+{answer}
+</answer>
     """
 
     initial_prompt = """
-    <instruction>
-    Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
-    </instruction>
+<instruction>
+Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
+</instruction>
 
-    <question>
-    {question}
-    </question>
+<question>
+{question}
+</question>
     """
 
 
@@ -617,6 +618,9 @@ class Pipe:
     def __init__(self):
         self.type = "manifold"
         self.valves = self.Valves()
+        self.valves._session_id = "".join(
+            random.choices("abcdefghijklmnopqrstuvwxyz", k=5)
+        )
         logger.debug(f"Valves configuration: {self.valves}")
         self.llm_client = LLMClient(self.valves)
         self.langfuse_handler = None
@@ -737,6 +741,6 @@ class Pipe:
         )
 
         # Run MCTS search
-        best_answer = await mcts_agent.search()
+        _ = await mcts_agent.search()
 
         return ""
