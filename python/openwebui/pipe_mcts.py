@@ -12,7 +12,6 @@ import random
 import math
 import json
 import re
-import os
 
 # * Patch for user-id missing in the request
 from types import SimpleNamespace
@@ -38,8 +37,6 @@ from open_webui.apps.ollama import main as ollama
 from open_webui.constants import TASKS
 
 
-# Setup Logging
-
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     logger.setLevel(logging.DEBUG)
@@ -51,8 +48,6 @@ if not logger.handlers:
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.propagate = False
-
-# =============================================================================
 
 
 class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
@@ -81,9 +76,8 @@ class AsyncIteratorCallbackHandler(AsyncCallbackHandler):
 
 class LLMClient:
     def __init__(self, valves: "Pipe.Valves", user_mod=None):
-        self.openai_api_key = valves.OPENAI_API_KEY
-        self.openai_api_base_url = valves.OPENAI_API_BASE_URL
-        self.ollama_api_base_url = valves.OLLAMA_API_BASE_URL
+        logger.debug(f"Valves configuration: {valves}")
+        self.valves = valves
         self.__user__ = user_mod
 
     async def create_chat_completion(
@@ -100,31 +94,47 @@ class LLMClient:
                 else:
                     lc_messages.append(HumanMessage(content=msg["content"]))
 
+            if self.valves.LANGFUSE_SECRET_KEY:
+                self.langfuse_handler = CallbackHandler(
+                    secret_key=self.valves.LANGFUSE_SECRET_KEY,
+                    public_key=self.valves.LANGFUSE_PUBLIC_KEY,
+                    host=self.valves.LANGFUSE_URL,
+                    tags=["mcts", "openwebui"],
+                )
+                logger.debug("Using Langfuse for logging")
+
             if stream:
                 # Create a callback handler to capture streamed tokens
                 handler = AsyncIteratorCallbackHandler()
+
                 oai_model = ChatOpenAI(
-                    base_url=self.openai_api_base_url,
-                    api_key=self.openai_api_key,
-                    model=model,
+                    extra_body={"cache": {"no-cache": True}},
+                    base_url=self.valves.OAI_API_BASE_URL,
+                    api_key=self.valves.OAI_LLM_API_KEY,
                     streaming=True,
-                    model_kwargs={"extra_body": {"cache": {"no-cache": True}}},
+                    model=model,
                     cache=False,
-                    callbacks=[handler],  # Pass the handler here
+                    callbacks=[handler],
                 )
                 # Call agenerate with messages
-                asyncio.create_task(oai_model.agenerate([lc_messages]))
+                asyncio.create_task(
+                    oai_model.agenerate(
+                        [lc_messages], callbacks=[self.langfuse_handler]
+                    )
+                )
                 return handler  # Return the handler to iterate over
             else:
                 oai_model = ChatOpenAI(
-                    base_url=self.openai_api_base_url,
-                    api_key=self.openai_api_key,
-                    model=model,
+                    extra_body={"cache": {"no-cache": True}},
+                    base_url=self.valves.OAI_API_BASE_URL,
+                    api_key=self.valves.OAI_LLM_API_KEY,
                     streaming=False,
+                    model=model,
                     cache=False,
-                    model_kwargs={"extra_body": {"cache": {"no-cache": True}}},
                 )
-                response = await oai_model.agenerate([lc_messages])
+                response = await oai_model.agenerate(
+                    [lc_messages], callbacks=[self.langfuse_handler]
+                )
                 # Extract the AIMessage from the response
                 ai_message = response.generations[0][0].message
                 return ai_message.content
@@ -182,11 +192,6 @@ class LLMClient:
                     yield delta["content"]
         except json.JSONDecodeError:
             logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
-
-
-# =============================================================================
-
-# MCTS Classes
 
 
 class Node:
@@ -426,23 +431,27 @@ class MCTSAgent:
 
     # LLM interaction methods
     async def generate_thought(self, answer: str):
-        prompt = thoughts_prompt.format(question=self.question, answer=answer)
+        prompt = MCTSPromptTemplates.thoughts_prompt.format(
+            question=self.question, answer=answer
+        )
         return await self.generate_completion(prompt)
 
     async def update_approach(self, answer: str, improvements: str):
-        prompt = update_prompt.format(
+        prompt = MCTSPromptTemplates.update_prompt.format(
             question=self.question, answer=answer, critique=improvements
         )
         return await self.generate_completion(prompt)
 
     async def evaluate_answer(self, answer: str):
-        prompt = eval_answer_prompt.format(question=self.question, answer=answer)
+        prompt = MCTSPromptTemplates.eval_answer_prompt.format(
+            question=self.question, answer=answer
+        )
         result = await self.generate_completion(prompt)
         try:
             score = int(re.search(r"\d+", result).group())
             return score
         except Exception as e:
-            logger.error(f"Failed to parse score from result: {result}")
+            logger.error(f"Failed to parse score from result: {result} - {e}")
             return 0
 
     async def generate_completion(self, prompt: str):
@@ -486,96 +495,94 @@ class MCTSAgent:
             await self.event_emitter({"type": "replace", "data": {"content": content}})
 
 
-# =============================================================================
+class MCTSPromptTemplates:
+    """Class to store prompt templates for MCTS interactions"""
 
-# Optimized Prompts
+    thoughts_prompt = """
+    <instruction>
+    In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
+    </instruction>
 
-thoughts_prompt = """
-<instruction>
-In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
-</instruction>
+    <question>
+    {question}
+    </question>
 
-<question>
-{question}
-</question>
+    <draft>
+    {answer}
+    </draft>
+    """
 
-<draft>
-{answer}
-</draft>
-"""
+    update_prompt = """
+    <instruction>
+    Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
+    </instruction>
 
-update_prompt = """
-<instruction>
-Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
-</instruction>
+    <question>
+    {question}
+    </question>
 
-<question>
-{question}
-</question>
+    <draft>
+    {answer}
+    </draft>
 
-<draft>
-{answer}
-</draft>
+    <critique>
+    {critique}
+    </critique>
+    """
 
-<critique>
-{critique}
-</critique>
-"""
+    eval_answer_prompt = """
+    <instruction>
+    Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
 
-eval_answer_prompt = """
-<instruction>
-Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
+    - **1**: Completely incorrect or irrelevant.
+    - **5**: Partially correct but incomplete or unclear.
+    - **10**: Fully correct, comprehensive, and clear.
 
-- **1**: Completely incorrect or irrelevant.
-- **5**: Partially correct but incomplete or unclear.
-- **10**: Fully correct, comprehensive, and clear.
+    Do not include any additional text.
+    </instruction>
 
-Do not include any additional text.
-</instruction>
+    <question>
+    {question}
+    </question>
 
-<question>
-{question}
-</question>
+    <answer>
+    {answer}
+    </answer>
+    """
 
-<answer>
-{answer}
-</answer>
-"""
+    initial_prompt = """
+    <instruction>
+    Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
+    </instruction>
 
-initial_prompt = """
-<instruction>
-Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
-</instruction>
-
-<question>
-{question}
-</question>
-"""
-# =============================================================================
+    <question>
+    {question}
+    </question>
+    """
 
 
 class Pipe:
     class Valves(BaseModel):
         # ! FIX: User Provided Valves not being used. Only defaults used.
         # Manually set the default values for the valves
-        OPENAI_API_KEY: str = Field(
+        OAI_LLM_API_KEY: Optional[str] = Field(
             default="sk-Change-Me", description="OpenAI API key"
         )
-        OPENAI_API_BASE_URL: str = Field(
+        OAI_API_BASE_URL: Optional[str] = Field(
             default="http://litellm:4000/v1", description="OpenAI API base URL"
         )
-        OLLAMA_API_BASE_URL: str = Field(
+        OLLAMA_API_BASE_URL: Optional[str] = Field(
             default="http://ollama.lan:11434", description="Ollama API base URL"
         )
-        LANGFUSE_SECRET_KEY: str = Field(
+        LANGFUSE_SECRET_KEY: Optional[str] = Field(
             default="sk-Change-Me",
             description="Langfuse secret key",
         )
-        LANGFUSE_PUBLIC_KEY: str = Field(
+        LANGFUSE_PUBLIC_KEY: Optional[str] = Field(
             default="pk-Change-Me",
             description="Langfuse public key",
         )
-        LANGFUSE_URL: str = Field(
+        LANGFUSE_URL: Optional[str] = Field(
             default="http://langfuse-server:3000", description="Langfuse URL"
         )
         EXPLORATION_WEIGHT: float = Field(
@@ -590,37 +597,21 @@ class Pipe:
         MAX_CHILDREN: int = Field(
             default=2, description="Maximum number of children per node in MCTS"
         )
-        OLLAMA_MODELS: str = Field(
+        OLLAMA_MODELS: Optional[str] = Field(
             default="Ollama/Avalanche/.tulu3:8b,Ollama/Avalanche/.llama3.2-vision:11b",
             description="Comma-separated list of Ollama model IDs",
         )
-        OPENAI_MODELS: str = Field(
+        OPENAI_MODELS: Optional[str] = Field(
             default="openai/gpt-4o,openai/gpt-4o-mini",
             description="Comma-separated list of OpenAI model IDs",
         )
 
     def __init__(self):
         self.type = "manifold"
-        self.valves = self.Valves(
-            **{
-                k: v.default if v.default is not None else os.getenv(k)
-                for k, v in self.Valves.model_fields.items()
-            }
-        )
+        self.valves = self.Valves()
         logger.debug(f"Valves configuration: {self.valves}")
         self.llm_client = LLMClient(self.valves)
         self.langfuse_handler = None
-        if (
-            self.valves.LANGFUSE_SECRET_KEY
-            and self.valves.LANGFUSE_PUBLIC_KEY
-            and self.valves.LANGFUSE_URL
-            and CallbackHandler
-        ):
-            self.langfuse_handler = CallbackHandler(
-                secret_key=self.valves.LANGFUSE_SECRET_KEY,
-                public_key=self.valves.LANGFUSE_PUBLIC_KEY,
-                host=self.valves.LANGFUSE_URL,
-            )
 
     def pipes(self) -> List[dict]:
         # Collect models from both OpenAI and Ollama
@@ -708,7 +699,9 @@ class Pipe:
             return f"Title: {content}"
 
         # Start MCTS process
-        initial_prompt_filled = initial_prompt.format(question=question)
+        initial_prompt_filled = MCTSPromptTemplates.initial_prompt.format(
+            question=question
+        )
         initial_reply = await self.llm_client.get_completion(
             [{"role": "user", "content": initial_prompt_filled}],
             self.model,
