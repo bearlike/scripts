@@ -181,7 +181,8 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error(f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
+            logger.error(
+                f'ChunkDecodeError: unable to parse "{chunk_str[:100]}"')
 
 
 # =============================================================================
@@ -436,7 +437,8 @@ class MCTSAgent:
         return await self.generate_completion(prompt)
 
     async def evaluate_answer(self, answer: str):
-        prompt = eval_answer_prompt.format(question=self.question, answer=answer)
+        prompt = eval_answer_prompt.format(
+            question=self.question, answer=answer)
         result = await self.generate_completion(prompt)
         try:
             score = int(re.search(r"\d+", result).group())
@@ -672,7 +674,8 @@ class Pipe:
         if match:
             backend, model_name = match.groups()
         else:
-            logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
+            logger.error(
+                "Model ID should be in the format '*.mcts/backend/model_name'")
             logger.error(f"Invalid model ID: {model_id}")
             return ""
 
