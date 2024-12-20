@@ -1,51 +1,42 @@
 """
 title: MCTS Answer Generation Pipe
-author: KK
 description: Monte Carlo Tree Search Pipe Addon for OpenWebUI with support for OpenAI and Ollama endpoints.
+author: https://github.com/bearlike/scripts
+requirements: langchain-openai, langfuse, pydantic
 version: 1.0.0
 """
 
 import logging
+import asyncio
 import random
 import math
-import asyncio
 import json
 import re
 import os
 
-from typing import (
-    List,
-    Optional,
-    Callable,
-    Awaitable,
-    Union,
-    AsyncGenerator,
-    Generator,
-    Iterator,
-)
-
-import openai
-from langchain_openai import ChatOpenAI
-from langchain.callbacks.base import AsyncCallbackHandler
-from langchain.schema import AIMessage, HumanMessage, BaseMessage
-
-
-from pydantic import BaseModel, Field
-
-from open_webui.constants import TASKS
-from open_webui.apps.ollama import main as ollama
-
 # * Patch for user-id missing in the request
 from types import SimpleNamespace
+from typing import (
+    AsyncGenerator,
+    Awaitable,
+    Generator,
+    Optional,
+    Callable,
+    Iterator,
+    Union,
+    List,
+)
 
-# Import Langfuse for logging/tracing (optional)
+from langchain.callbacks.base import AsyncCallbackHandler
+from langchain.schema import AIMessage, HumanMessage
+from langfuse.callback import CallbackHandler
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
-try:
-    from langfuse.callback import CallbackHandler
-except ImportError:
-    CallbackHandler = None  # Langfuse is optional
+# Ollama-specific imports
+from open_webui.apps.ollama import main as ollama
+from open_webui.constants import TASKS
 
-# =============================================================================
 
 # Setup Logging
 
@@ -117,6 +108,8 @@ class LLMClient:
                     api_key=self.openai_api_key,
                     model=model,
                     streaming=True,
+                    model_kwargs={"extra_body": {"cache": {"no-cache": True}}},
+                    cache=False,
                     callbacks=[handler],  # Pass the handler here
                 )
                 # Call agenerate with messages
@@ -128,6 +121,8 @@ class LLMClient:
                     api_key=self.openai_api_key,
                     model=model,
                     streaming=False,
+                    cache=False,
+                    model_kwargs={"extra_body": {"cache": {"no-cache": True}}},
                 )
                 response = await oai_model.agenerate([lc_messages])
                 # Extract the AIMessage from the response
@@ -493,13 +488,11 @@ class MCTSAgent:
 
 # =============================================================================
 
-# Prompts
+# Optimized Prompts
 
 thoughts_prompt = """
 <instruction>
-Give a suggestion on how this answer can be improved.
-WRITE ONLY AN IMPROVEMENT SUGGESTION AND NOTHING ELSE.
-YOUR REPLY SHOULD BE A SINGLE SENTENCE.
+In one sentence, provide a specific suggestion to improve the answer's accuracy, completeness, or clarity. Do not repeat previous suggestions or include any additional content.
 </instruction>
 
 <question>
@@ -513,45 +506,52 @@ YOUR REPLY SHOULD BE A SINGLE SENTENCE.
 
 update_prompt = """
 <instruction>
-Your task is to read the question and the answer below, then analyze the given critique.
-When you are done - think about how the answer can be improved based on the critique.
-WRITE A REVISED ANSWER THAT ADDRESSES THE CRITIQUE. DO NOT WRITE ANYTHING ELSE.
+Revise the answer below to address the critique and improve its quality. Provide only the updated answer without any extra explanation or repetition.
 </instruction>
+
 <question>
 {question}
 </question>
+
 <draft>
 {answer}
 </draft>
+
 <critique>
 {critique}
 </critique>
 """
 
 eval_answer_prompt = """
-Given the following text:
-"{answer}"
+<instruction>
+Evaluate how well the answer responds to the question. Use the following scale and reply with a single number only:
 
-How well does it answer this question:
-"{question}"
+- **1**: Completely incorrect or irrelevant.
+- **5**: Partially correct but incomplete or unclear.
+- **10**: Fully correct, comprehensive, and clear.
 
-Rate the answer from 1 to 10, where 1 is completely wrong or irrelevant and 10 is a perfect answer.
-Reply with a single number between 1 and 10 only. Do not write anything else, it will be discarded.
+Do not include any additional text.
+</instruction>
+
+<question>
+{question}
+</question>
+
+<answer>
+{answer}
+</answer>
 """
 
 initial_prompt = """
 <instruction>
-Answer the question below. Do not pay attention to unexpected casing, punctuation, or accent marks.
+Provide a clear, accurate, and complete answer to the question below. Consider different perspectives and avoid repeating common answers. Ignore any unexpected casing, punctuation, or accent marks.
 </instruction>
 
 <question>
 {question}
 </question>
 """
-
 # =============================================================================
-
-# Pipe Class
 
 
 class Pipe:
