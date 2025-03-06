@@ -13,6 +13,8 @@ Got scripts? See [Contributing](.github/CONTRIBUTING.md).
 ## Extras
 
 - The [`openfaas-function` folder](openfaas-function/README.md) contains OpenFaaS functions, a framework for building serverless functions on containers with simplified Kubernetes deployment. It's portable across environments, supports any language, and features automatic scaling with built-in observability.
+    - Example (`/function/llm-global-spend`):
+      ![litellm-sample](openfaas-function/docs/litellm-sample.png)
 - The [`OpenWebUI` folder](python/openwebui) contains plugins (pipes, filters and functions) for OpenWebUI, a web interface for interacting with LLMs. These plugins enable agent workflows, logging, and other advanced features.
 
 ## Lot of Scripts

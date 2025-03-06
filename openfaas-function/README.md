@@ -20,6 +20,12 @@ This repository contains OpenFaaS functions. [OpenFaaS](https://www.openfaas.com
 The `stack.yml` file contains the function definitions and deployment configuration. To deploy the functions, run:
 
 ```bash
+# Copy the stack.sample.yml to stack.yml
+cp stack.sample.yml stack.yml
+# Update the stack.yml with your environment variables
+```
+
+```bash
 faas-cli update -f stack.yml
 ```
 
@@ -30,6 +36,11 @@ Within the intranet, the serverless orchestration is done using OpenFaaS. It is 
 ### Function Catalog
 
 #### llm-global-spend
+
+Calculates spend from Lite-LLM API logs instead of using the periodic spend API endpoint, which is now paywalled. Tested to work with `1.53.7`.
+
+
+![Sample Request](docs/litellm-sample.png)
 
 > [!WARNING]
 > Requires a hosted [Lite-LLM](https://github.com/BerriAI/litellm) instance. You need to add `LITELLM_API_KEY` and `LITELLM_API_BASE_URL` environment variables in `stack.yaml` for the function to work.
