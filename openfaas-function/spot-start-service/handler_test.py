@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-import unittest
-from unittest.mock import patch, MagicMock
 import json
+import unittest
+from dotenv import load_dotenv
+from unittest.mock import patch, MagicMock
 from handler import handle, PortainerAPIClient, ServiceManager
+
+load_dotenv()
 
 
 class TestSpotStartService(unittest.TestCase):

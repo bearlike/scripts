@@ -1,0 +1,23 @@
+[project]
+name = "openfaas-function"
+version = "0.1.0"
+description = "Use this to quickly create a development environment for your OpenFaaS function"
+authors = [
+    { name = "Krishnakanth Alagiri", email = "39209037+bearlike@users.noreply.github.com" },
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "loguru (>=0.7.3,<0.8.0)",
+    "pytest (>=8.3.5,<9.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

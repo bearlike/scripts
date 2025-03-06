@@ -213,3 +213,13 @@ def handle(event, context):
             "body": json.dumps({"error": "Internal server error"}),
             "headers": {"Content-Type": "application/json"},
         }
+
+
+if __name__ == "__main__":
+    # Example event for local testing
+    # Ensure env vars are set for local testing
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    response = handle(None, None)
+    logger.info(f"Local test response: {response}")

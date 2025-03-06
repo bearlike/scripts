@@ -21,8 +21,15 @@ The `stack.yml` file contains the function definitions and deployment configurat
 
 ```bash
 # Copy the stack.sample.yml to stack.yml
-cp stack.sample.yml stack.yml
 # Update the stack.yml with your environment variables
+cp stack.sample.yml stack.yml
+```
+
+OpenFaaS supports various languages through its own templates concept. We use their [`python3-http`](https://github.com/openfaas/python-flask-template) template, which is based on Alpine Linux and has a small footprint.
+
+```bash
+# This is an official template maintained by OpenFaaS
+faas-cli template store pull python3-http
 ```
 
 ```bash
@@ -38,7 +45,6 @@ Within the intranet, the serverless orchestration is done using OpenFaaS. It is 
 #### llm-global-spend
 
 Calculates spend from Lite-LLM API logs instead of using the periodic spend API endpoint, which is now paywalled. Tested to work with `1.53.7`.
-
 
 ![Sample Request](docs/litellm-sample.png)
 

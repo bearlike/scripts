@@ -25,3 +25,7 @@ functions:
       PORTAINER_API_URL: "https://portainer.server.local"
       PORTAINER_USERNAME: "username"
       PORTAINER_PASSWORD: "password"
+
+configuration:
+  templates:
+    - name: python3-http

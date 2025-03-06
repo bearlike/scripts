@@ -1,9 +1,11 @@
+# OpenFAAS related files
 template
 build
 .secrets
 stack.yml
+stack.yaml
 *.env
-
+pyenv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

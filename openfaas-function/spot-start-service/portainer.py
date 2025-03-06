@@ -184,7 +184,9 @@ class PortainerAPIClient:
 class ServiceManager:
     """Manages service stack operations"""
 
-    def __init__(self, api_client: PortainerAPIClient):
+    def __init__(
+        self, api_client: PortainerAPIClient, endpoints_config: Dict[str, Any]
+    ):
         """
         Initialize with API client
 
@@ -192,8 +194,10 @@ class ServiceManager:
             api_client: Portainer API client instance
         """
         self.api_client = api_client
-        self.endpoints_config = ENDPOINTS_CONFIG
-        logger.debug(f"ServiceManager initialized")
+        self.endpoints_config = endpoints_config
+        logger.debug(
+            f"ServiceManager initialized <api_client={api_client}, endpoints_config={endpoints_config}>"
+        )
 
     def find_service_location(self, service_name: str) -> Optional[Tuple[str, str]]:
         """

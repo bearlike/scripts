@@ -1,8 +1,11 @@
-import pytest
 import json
+import pytest
 import datetime
 from loguru import logger
+from dotenv import load_dotenv
 from handler import handle, LiteLLMAPIClient, SpendAnalyzer, get_spend_data
+
+load_dotenv()
 
 
 @pytest.fixture

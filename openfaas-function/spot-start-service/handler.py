@@ -43,6 +43,7 @@ ENDPOINTS_CONFIG = {
 
 try:
     from constants import PORTAINER_ENDPOINTS_CONFIG
+
     ENDPOINTS_CONFIG = PORTAINER_ENDPOINTS_CONFIG.copy()
 except ImportError as err_msg:
     logger.exception(err_msg)
@@ -95,7 +96,7 @@ def handle(event, context):
 
         # Initialize API client
         api_client = PortainerAPIClient()
-        service_manager = ServiceManager(api_client)
+        service_manager = ServiceManager(api_client, ENDPOINTS_CONFIG)
 
         # Start the service
         result = service_manager.start_service(service_name)
@@ -135,6 +136,9 @@ def handle(event, context):
 if __name__ == "__main__":
     # Example event for local testing
     # Ensure env vars are set for local testing
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
     class TestEvent:
         def __init__(self, method, body):
@@ -149,4 +153,6 @@ if __name__ == "__main__":
         method="POST",
         body=byte_data,
     )
-    handle(test_event, None)
+    logger.debug(f"Local test event: {test_event}")
+    response = handle(test_event, None)
+    logger.info(f"Local test response: {response}")
