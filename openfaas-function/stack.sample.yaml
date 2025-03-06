@@ -1,0 +1,27 @@
+version: 1.0
+
+provider:
+  name: openfaas
+  #  * Modify the URL to match your openfaas gateway
+  gateway: https://serverless.server.local
+
+functions:
+  # * Modify environment variables to match your setup
+  # * Optional: Modify the image name to match your registry
+
+  llm-global-spend:
+    lang: python3-http
+    handler: ./llm-global-spend
+    image: "llm-global-spend:latest"
+    environment:
+      LITELLM_API_KEY: "sk-KEY_FROM_LITELLM"
+      LITELLM_API_BASE_URL: "https://llms.server.local"
+
+  spot-start-service:
+    lang: python3-http
+    handler: ./spot-start-service
+    image: "spot-start-service:latest"
+    environment:
+      PORTAINER_API_URL: "https://portainer.server.local"
+      PORTAINER_USERNAME: "username"
+      PORTAINER_PASSWORD: "password"

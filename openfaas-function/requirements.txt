@@ -1,0 +1,5 @@
+# Your existing requirements
+scrapy
+loguru
+# Add the CloudFlare middleware package
+scrapy-cloudflare-middleware

@@ -1,0 +1,3 @@
+requests (<3.0)
+loguru (<1.0)
+pytest (<9.0)
