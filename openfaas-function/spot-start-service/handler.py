@@ -47,7 +47,8 @@ try:
     ENDPOINTS_CONFIG = PORTAINER_ENDPOINTS_CONFIG.copy()
 except ImportError as err_msg:
     logger.exception(err_msg)
-    logger.exception("Failed to import constants.py. You may need to create it.")
+    logger.exception(
+        "Failed to import constants.py. You may need to create it.")
     raise err_msg
 
 
@@ -89,7 +90,8 @@ def handle(event, context):
             return {
                 "statusCode": 400,
                 "body": json.dumps(
-                    {"error": "Service name is required", "event": format_event(event)}
+                    {"error": "Service name is required",
+                        "event": format_event(event)}
                 ),
                 "headers": {"Content-Type": "application/json"},
             }
@@ -103,7 +105,8 @@ def handle(event, context):
 
         status_code = 200 if result.get("success", False) else 500
 
-        logger.success(f"Request processed with status {status_code}: {result}")
+        logger.success(
+            f"Request processed with status {status_code}: {result}")
         return {
             "statusCode": status_code,
             "body": json.dumps(result),
@@ -115,7 +118,8 @@ def handle(event, context):
         return {
             "statusCode": 400,
             "body": json.dumps(
-                {"error": "Invalid JSON in request", "event": format_event(event)}
+                {"error": "Invalid JSON in request",
+                    "event": format_event(event)}
             ),
             "headers": {"Content-Type": "application/json"},
         }
