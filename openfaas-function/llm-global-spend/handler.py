@@ -31,7 +31,8 @@ class LiteLLMAPIClient:
             "accept": "application/json",
             "x-goog-api-key": api_key,
         }
-        logger.debug(f"LiteLLMAPIClient initialized with base URL: {self.base_url}")
+        logger.debug(
+            f"LiteLLMAPIClient initialized with base URL: {self.base_url}")
 
     def fetch_spending_logs(
         self, user_id=None, start_date="2024-06-01", end_date="2025-12-31"
@@ -51,12 +52,14 @@ class LiteLLMAPIClient:
             requests.exceptions.RequestException: If the API request fails
         """
         spending_logs_endpoint = f"{self.base_url}/spend/logs"
-        params = {"user_id": user_id, "start_date": start_date, "end_date": end_date}
+        params = {"user_id": user_id,
+                  "start_date": start_date, "end_date": end_date}
 
         logger.info(
             f"Fetching spend logs for user {user_id} from {start_date} to {end_date}"
         )
-        logger.debug(f"API request to {spending_logs_endpoint} with params: {params}")
+        logger.debug(
+            f"API request to {spending_logs_endpoint} with params: {params}")
 
         try:
             response = requests.get(
@@ -64,7 +67,8 @@ class LiteLLMAPIClient:
             )
             response.raise_for_status()
             data = response.json()
-            logger.success(f"Successfully fetched {len(data)} spending log entries")
+            logger.success(
+                f"Successfully fetched {len(data)} spending log entries")
             return data
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to fetch spending logs: {str(e)}")
@@ -82,7 +86,8 @@ class SpendAnalyzer:
             spend_data: List of spending records
         """
         self.spend_data = spend_data
-        logger.debug(f"SpendAnalyzer initialized with {len(spend_data)} records")
+        logger.debug(
+            f"SpendAnalyzer initialized with {len(spend_data)} records")
 
     def get_total_spend(self) -> float:
         """Calculate the total spend across all records"""
@@ -103,7 +108,8 @@ class SpendAnalyzer:
         Returns:
             float: Total spend in the specified date range
         """
-        logger.debug(f"Calculating filtered spend from {start_date} to {end_date}")
+        logger.debug(
+            f"Calculating filtered spend from {start_date} to {end_date}")
         filtered_spend = 0
         valid_entries = 0
         invalid_entries = 0
@@ -111,12 +117,14 @@ class SpendAnalyzer:
         for entry in self.spend_data:
             date_string = entry.get("startTime", "")
             try:
-                entry_date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+                entry_date = datetime.datetime.strptime(
+                    date_string, "%Y-%m-%d")
                 if start_date <= entry_date < end_date:
                     spend_amount = entry.get("spend", 0)
                     filtered_spend += spend_amount
                     valid_entries += 1
-                    logger.debug(f"Added spend entry: {date_string} = {spend_amount}")
+                    logger.debug(
+                        f"Added spend entry: {date_string} = {spend_amount}")
             except ValueError:
                 logger.warning(f"Invalid date format in entry: {date_string}")
                 invalid_entries += 1
@@ -131,7 +139,8 @@ class SpendAnalyzer:
         """Calculate spend for the current month"""
         now = datetime.datetime.now()
         first_day = now.replace(day=1)
-        next_month = (now.replace(day=28) + datetime.timedelta(days=4)).replace(day=1)
+        next_month = (now.replace(day=28) +
+                      datetime.timedelta(days=4)).replace(day=1)
 
         logger.info(
             f"Calculating current month spend ({first_day.strftime('%Y-%m-%d')} to {next_month.strftime('%Y-%m-%d')})"
@@ -144,7 +153,8 @@ class SpendAnalyzer:
         today = now.replace(hour=0, minute=0, second=0, microsecond=0)
         tomorrow = today + datetime.timedelta(days=1)
 
-        logger.info(f"Calculating today's spend ({today.strftime('%Y-%m-%d')})")
+        logger.info(
+            f"Calculating today's spend ({today.strftime('%Y-%m-%d')})")
         return self.get_filtered_spend(today, tomorrow)
 
 
@@ -192,7 +202,8 @@ def handle(event, context):
             "today_spend": float(today_spend),
         }
 
-        logger.success(f"Successfully processed request, returning data: {response}")
+        logger.success(
+            f"Successfully processed request, returning data: {response}")
         return {
             "statusCode": 200,
             "body": json.dumps(response),

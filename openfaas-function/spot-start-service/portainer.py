@@ -22,10 +22,13 @@ class PortainerAPIClient:
         self.verify_ssl = False
 
         if not self.base_url or not self.username or not self.password:
-            logger.error("Portainer URL, username and password must be provided")
-            raise ValueError("Portainer URL, username and password must be provided")
+            logger.error(
+                "Portainer URL, username and password must be provided")
+            raise ValueError(
+                "Portainer URL, username and password must be provided")
 
-        logger.debug(f"PortainerAPIClient initialized with base URL: {self.base_url}")
+        logger.debug(
+            f"PortainerAPIClient initialized with base URL: {self.base_url}")
 
     def authenticate(self) -> str:
         """
@@ -51,7 +54,8 @@ class PortainerAPIClient:
 
             if not token:
                 logger.error("Authentication failed: No JWT token in response")
-                raise ValueError("Authentication failed: No JWT token in response")
+                raise ValueError(
+                    "Authentication failed: No JWT token in response")
 
             self.jwt_token = token
             logger.success("Successfully authenticated with Portainer API")
@@ -101,7 +105,8 @@ class PortainerAPIClient:
             )
             response.raise_for_status()
             containers = response.json()
-            logger.success(f"Successfully fetched {len(containers)} containers")
+            logger.success(
+                f"Successfully fetched {len(containers)} containers")
             return containers
 
         except requests.exceptions.RequestException as e:
@@ -217,7 +222,8 @@ class ServiceManager:
                     )
                     return (endpoint_id, stack_id)
 
-        logger.warning(f"Service '{service_name}' not found in endpoints configuration")
+        logger.warning(
+            f"Service '{service_name}' not found in endpoints configuration")
         return None
 
     def check_service_health(
@@ -242,7 +248,8 @@ class ServiceManager:
         docker_version = endpoint_info.get("docker_version", "v1.24")
 
         try:
-            containers = self.api_client.get_containers(endpoint_id, docker_version)
+            containers = self.api_client.get_containers(
+                endpoint_id, docker_version)
 
             # Filter containers belonging to this service/stack
             service_containers = []
@@ -254,7 +261,8 @@ class ServiceManager:
                     service_containers.append(container)
 
             if not service_containers:
-                logger.warning(f"No containers found for service '{service_name}'")
+                logger.warning(
+                    f"No containers found for service '{service_name}'")
                 return (False, service_location)
 
             # Check if all containers are healthy
@@ -301,7 +309,8 @@ class ServiceManager:
             endpoint_id, stack_id = location
 
             if is_healthy:
-                logger.info(f"Service '{service_name}' is already running and healthy")
+                logger.info(
+                    f"Service '{service_name}' is already running and healthy")
                 return {
                     "success": True,
                     "message": f"Service '{service_name}' is already running",
@@ -320,7 +329,8 @@ class ServiceManager:
                 self.api_client.stop_stack(stack_id, endpoint_id)
                 time.sleep(5)  # Give it some time to stop
             except Exception as e:
-                logger.warning(f"Error stopping service (continuing anyway): {str(e)}")
+                logger.warning(
+                    f"Error stopping service (continuing anyway): {str(e)}")
 
             # Start the service
             self.api_client.start_stack(stack_id, endpoint_id)
@@ -334,5 +344,6 @@ class ServiceManager:
             }
 
         except Exception as e:
-            logger.exception(f"Error starting service '{service_name}': {str(e)}")
+            logger.exception(
+                f"Error starting service '{service_name}': {str(e)}")
             return {"success": False, "message": f"Error starting service: {str(e)}"}
