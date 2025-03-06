@@ -84,9 +84,10 @@ Each entry in the response matching the service name is a container running with
         "ImageID": "sha256:abc123def456789abcdef0123456789abcdef0123456789abcdef0123456789",
         "Labels": {
             "com.docker.compose.project": "example_stack", // Name of the service or docker-compose stack
+            "home.resolve.domain": "example.server.local" // Add service domain name label to docker-compose file.
             "com.docker.compose.project.config_files": "/data/compose/100/docker-compose.yml",
             "com.docker.compose.project.environment_file": "/data/compose/100/stack.env",
-            "com.docker.compose.project.working_dir": "/data/compose/100"
+            "com.docker.compose.project.working_dir": "/data/compose/100",
         },
         "Names": [
             "/example-container"

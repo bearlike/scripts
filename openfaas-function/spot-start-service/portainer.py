@@ -3,6 +3,7 @@ import os
 import time
 import requests
 from loguru import logger
+from urllib.parse import urlparse
 from typing import List, Dict, Any, Optional, Tuple
 
 
@@ -340,3 +341,69 @@ class ServiceManager:
         except Exception as e:
             logger.exception(f"Error starting service '{service_name}': {str(e)}")
             return {"success": False, "message": f"Error starting service: {str(e)}"}
+
+    def find_service_from_url(self, referral_url: str) -> Optional[str]:
+        """Get the service name from the referral URL"""
+        """
+        Extracts service name from a referral URL by matching domain to container labels in Portainer.
+
+        Args:
+            referral_url: URL to extract service name from
+
+        Returns:
+            str: Service (project) name if found
+            None: If no matching service is found
+
+        Raises:
+            No exceptions are raised - errors are logged and None is returned
+        """
+
+        service_name = None
+        # Handle various URL formats
+        if not referral_url.startswith(("http://", "https://")):
+            referral_url = "http://" + referral_url
+
+        parsed_url = urlparse(referral_url)
+        referral_domain = parsed_url.netloc.lower()
+
+        logger.info(f"Looking for service with domain: {referral_domain}")
+
+        # Search all endpoints for a container with a matching domain label
+        for endpoint_id, endpoint_info in self.endpoints_config["endpoints"].items():
+            if service_name:
+                break
+
+            docker_version = endpoint_info.get("docker_version", "v1.24")
+            try:
+                containers = self.api_client.get_containers(endpoint_id, docker_version)
+                for container in containers:
+                    labels: dict = container.get("Labels", {})
+                    domain_label: str = (
+                        labels.get("home.resolve.domain", "").lower().strip()
+                    )
+                    project_name: str = (
+                        labels.get("com.docker.compose.project" "").lower().strip()
+                    )
+
+                    # Skip if missing important labels
+                    if not domain_label or not project_name:
+                        continue
+
+                    # Try matching
+                    if domain_label == referral_domain:
+                        logger.info(
+                            f"Found exact matching service: {project_name} for domain {domain_label}"
+                        )
+                        service_name = project_name
+                        break
+
+            except Exception as e:
+                logger.warning(
+                    f"Error fetching containers for endpoint {endpoint_id}: {str(e)}"
+                )
+                continue
+
+        if not service_name:
+            logger.warning(f"No service found for domain: {referral_domain}")
+
+        return service_name
