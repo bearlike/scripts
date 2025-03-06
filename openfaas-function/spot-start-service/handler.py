@@ -2,7 +2,7 @@
 import json
 from loguru import logger
 from typing import Optional, Tuple
-from portainer import PortainerAPIClient, ServiceManager
+from .portainer import PortainerAPIClient, ServiceManager
 
 # Configure logger
 logger.add(
@@ -43,7 +43,7 @@ ENDPOINTS_CONFIG = {
 }
 
 try:
-    from constants import PORTAINER_ENDPOINTS_CONFIG
+    from .constants import PORTAINER_ENDPOINTS_CONFIG
 
     ENDPOINTS_CONFIG = PORTAINER_ENDPOINTS_CONFIG.copy()
 except ImportError as err_msg:
@@ -117,7 +117,7 @@ def handle(event, context):
         api_client = PortainerAPIClient()
         service_manager = ServiceManager(api_client, ENDPOINTS_CONFIG)
 
-        if referral_url and not service_name:
+        if referral_url:
             # Find the service name from the referral URL
             service_name = service_manager.find_service_from_url(referral_url)
             if not service_name:

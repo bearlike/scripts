@@ -33,7 +33,7 @@ faas-cli template store pull python3-http
 ```
 
 ```bash
-faas-cli update -f stack.yml
+faas-cli up -f stack.yml
 ```
 
 ## Serverless Functions

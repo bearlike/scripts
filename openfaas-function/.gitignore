@@ -171,3 +171,7 @@ cython_debug/
 template
 build
 .secrets
+
+template
+build
+.secrets
