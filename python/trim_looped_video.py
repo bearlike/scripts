@@ -47,11 +47,13 @@ def find_loop_point(video_path):
         # Convert frame to grayscale for easier comparison
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        if prev_frame is not None:
-            if is_similar_image(gray_frame, prev_frame):
-                # Loop detected
-                cap.release()
-                return frame_index / fps
+        if (
+            prev_frame is not None
+            and is_similar_image(gray_frame, prev_frame)
+        ):
+            # Loop detected
+            cap.release()
+            return frame_index / fps
 
         prev_frame = gray_frame
 
