@@ -32,7 +32,7 @@ def print_help():
 
 def return_zone_info(cf, get_zone_name):
     try:
-        zone_info = cf.zones.get(params={'name': get_zone_name})[0]
+        zone_info = cf.zones.get(params={"name": get_zone_name})[0]
     except IndexError:
         print("Zone does not exist in this token.")
         sys.exit(-1)
@@ -47,19 +47,19 @@ def add_record(zone_name, subdomain):
         sys.exit(-1)
     cf = CloudFlare.CloudFlare(token=c_token)
     zone_info = return_zone_info(cf, zone_name)
-    zone_id = zone_info['id']
-    dns_record = {'name': subdomain, 'type': 'A', 'content': c_ip}
+    zone_id = zone_info["id"]
+    dns_record = {"name": subdomain, "type": "A", "content": c_ip}
     try:
         r = cf.zones.dns_records.post(zone_id, data=dns_record)
     except CloudFlare.exceptions.CloudFlareAPIError:
         print("Record already Exist.")
         sys.exit(-1)
-    if r['name'] == subdomain+'.'+zone_name:
+    if r["name"] == subdomain + "." + zone_name:
         print(f"{r['name']}, added successfully.")
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         a_zone_name = sys.argv[1]
         a_subdomain = sys.argv[2]
