@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # pip3 install instaloader
 import instaloader
@@ -20,10 +18,6 @@ def login_instagram(username, password):
     profile (instaloader.Profile): The user's Instagram profile
     """
     L = instaloader.Instaloader()
-    # L.two_factor_authenticator = instaloader.TwoFactorAuthenticator(
-    #    console_handler=instaloader.console_handler)
-    # L.load_session_from_file(username)
-    # L.login(username, password)
     L.interactive_login(username)
     profile = instaloader.Profile.from_username(L.context, username)
     return L, profile
