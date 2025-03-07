@@ -59,7 +59,8 @@ def turn_off_tv():
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ssh_host, username=ssh_uname, password=ssh_pass)
         # skipcq: BAN-B601
-        ssh.exec_command(f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
+        ssh.exec_command(
+            f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
         ssh.close()
     # skipcq: PYL-W0703
     except Exception as error:
