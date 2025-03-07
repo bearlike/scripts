@@ -44,7 +44,8 @@ def send_notification(title, message, priority):
 def run_command(command):
     try:
         # Run the command
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(
+            command, capture_output=True, text=True, check=True)
 
         # Return the output or error based on the execution result
         if result.returncode == 0:
