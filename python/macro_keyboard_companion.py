@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Companion script for my Macro Keyboard.
+"""Companion script for my Macro Keyboard.
 Use 'me2d13/luamacros' for keyboard input grabbing.
 
 Note: Make sure this script is run only by trusted users.
@@ -16,18 +16,20 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
 file_path = path.realpath(__file__)
-logging.basicConfig(filename=f'{file_path}/../windows_macro.log',
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%d-%m-%Y %H:%M:%S',
-                    encoding='utf-8', level=logging.WARNING)
+logging.basicConfig(
+    filename=f"{file_path}/../windows_macro.log",
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%d-%m-%Y %H:%M:%S",
+    encoding="utf-8",
+    level=logging.WARNING,
+)
 
 
 def keebs_shortcut(s_key):
-    """ Emulate keyboard shortcuts
-    """
+    """Emulate keyboard shortcuts"""
     shortcuts = {
-        "snip": [Key.cmd, Key.shift, 's'],
-        "vss_cmd_palette": [Key.ctrl, Key.shift, 'p']
+        "snip": [Key.cmd, Key.shift, "s"],
+        "vss_cmd_palette": [Key.ctrl, Key.shift, "p"],
     }
     try:
         keyboard = Controller()
@@ -41,8 +43,7 @@ def keebs_shortcut(s_key):
 
 
 def turn_off_tv():
-    """ Turn off TV and XServer
-    """
+    """Turn off TV and XServer"""
     h_host = getenv("HOME_ASSISTANT_API_HOST", default=None)
     h_token = getenv("HOME_ASSISTANT_API_TOKEN", default=None)
     ssh_host = getenv("REMOTE_1_SSH_HOST", default=None)
@@ -51,17 +52,14 @@ def turn_off_tv():
     if None in [h_host, h_token, ssh_host, ssh_uname, ssh_pass]:
         print("Enviroinment variables not found.")
         sys.exit(-1)
-    headers = {
-        'Authorization': f"Bearer {h_token}"
-    }
+    headers = {"Authorization": f"Bearer {h_token}"}
     # Using SSH to stop gdm3 on the ubuntu-htpc
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ssh_host, username=ssh_uname, password=ssh_pass)
         # skipcq: BAN-B601
-        ssh.exec_command(
-            f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
+        ssh.exec_command(f"echo {ssh_pass} | sudo -S systemctl stop gdm3 && exit")
         ssh.close()
     # skipcq: PYL-W0703
     except Exception as error:
@@ -71,9 +69,9 @@ def turn_off_tv():
         data = {"entity_id": "media_player.samsung_tv"}
         hostname = h_host
         requests.post(
-            f'{hostname}/api/services/media_player/turn_off',
+            f"{hostname}/api/services/media_player/turn_off",
             headers=headers,
-            data=json.dumps(data)
+            data=json.dumps(data),
         )
     # skipcq: PYL-W0703
     except Exception as error:
@@ -81,8 +79,7 @@ def turn_off_tv():
 
 
 def win_run(cmd: str):
-    """ Execute system commands
-    """
+    """Execute system commands"""
     try:
         # skipcq: BAN-B605
         system(cmd)

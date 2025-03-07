@@ -5,17 +5,16 @@ import os
 from datetime import datetime
 import logging
 
-logging.basicConfig(filename='delete_service.log',
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%d-%m-%Y %H:%M:%S',
-                    encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(
+    filename="delete_service.log",
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%d-%m-%Y %H:%M:%S",
+    encoding="utf-8",
+    level=logging.DEBUG,
+)
 
 
-def run(
-        path="/path/to/downloads",
-        exceptions=None,
-        max_days=10
-):
+def run(path="/path/to/downloads", exceptions=None, max_days=10):
     """
     Args:
         path (str, optional): Path to scan for deletion.
@@ -30,10 +29,10 @@ def run(
         for root, _, files in os.walk(path, topdown=False):
             for name in files:
                 file_path = os.path.join(root, name)
-                if not any(map(file_path.__contains__, exceptions)) and \
-                        not file_path.endswith(".!qb"):
-                    modified_time = datetime.fromtimestamp(
-                        os.path.getmtime(file_path))
+                if not any(
+                    map(file_path.__contains__, exceptions)
+                ) and not file_path.endswith(".!qb"):
+                    modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
                     today = datetime.today()
                     file_age = today - modified_time
                     if file_age.days >= max_days:
@@ -47,18 +46,20 @@ def run(
                         logging.debug(log_string)
         logging.info(
             "Service finished. Deleted %s files of %s bytes",
-            str(del_count), str(del_size)
+            str(del_count),
+            str(del_size),
         )
     # skipcq: PYL-W0703
     except Exception as _err:
         logging.error("Service interrupted. %s", _err)
         logging.error(
-            "Deleted %s files of %s bytes until error.",
-            str(del_count), str(del_size)
+            "Deleted %s files of %s bytes until error.", str(del_count), str(del_size)
         )
 
 
 if __name__ == "__main__":
-    run(path="/mnt/Downloads",
+    run(
+        path="/mnt/Downloads",
         exceptions=["/mnt/Downloads/script", "/mnt/Downloads/qbittorrent"],
-        max_days=10)
+        max_days=10,
+    )

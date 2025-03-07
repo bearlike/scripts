@@ -5,6 +5,7 @@ import requests
 import logging
 import sys
 import re
+import os
 
 # Set the logging level
 logging.basicConfig(
@@ -43,13 +44,12 @@ def send_notification(title, message, priority):
 def run_command(command):
     try:
         # Run the command
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(command, capture_output=True, text=True)
 
         # Return the output or error based on the execution result
         if result.returncode == 0:
             return result.stdout.strip()
-        else:
-            return f"Error: {result.stderr.strip()}"
+        return f"Error: {result.stderr.strip()}"
     except Exception as e:
         return f"Error: {str(e)}"
 

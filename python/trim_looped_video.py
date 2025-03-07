@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 import cv2
 import numpy as np
-from moviepy.editor import VideoFileClip
 from tqdm import tqdm
 
 
@@ -13,7 +13,8 @@ def is_similar_image(img1, img2, threshold=0.9):
     :param threshold: Threshold for similarity (0.9 by default).
     :return: Boolean indicating if images are similar.
     """
-    assert img1.shape == img2.shape, "Images must have the same shape."
+    if img1.shape != img2.shape:
+        raise AssertionError("Images must have the same shape.")
     similarity = np.sum(img1 == img2) / np.prod(img1.shape)
     return similarity > threshold
 
