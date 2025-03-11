@@ -5,6 +5,7 @@ import jinja2
 from loguru import logger
 from gradio_client import Client
 from typing import Optional, Tuple
+import datetime
 
 
 def build_response(
@@ -73,6 +74,10 @@ def parse_event_body(event) -> Optional[str]:
 
 
 def handle(event, context):
+    metadata = {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "linkedin_profile": None
+    }
     try:
         if event.method != "POST":
             return build_response(
@@ -85,6 +90,7 @@ def handle(event, context):
         if not profile_url:
             raise Exception("linkedin_profile not provided or empty")
 
+        metadata["linkedin_profile"] = profile_url
         prompt_dir = os.path.join(os.path.dirname(__file__), "prompts")
         task_prompt = render_template(
             os.path.join(prompt_dir, "task.md.j2"), PROFILE_URL=profile_url
@@ -128,13 +134,18 @@ def handle(event, context):
             save_recording_path="./tmp/record_videos",
             save_agent_history_path="./tmp/agent_history",
         )
-        response = {"status": "Automation Completed", "result": result}
+        response = {
+            "status": "Automation Completed",
+            "result": result,
+            "metadata": metadata,
+        }
         logger.success(response)
         return build_response(body=response)
     except Exception as e:
         logger.exception("An error occurred while handling the request")
         return build_response(
-            status_code=500, body={"error": f"Error while processing - {e}"}
+            status_code=500,
+            body={"error": f"Error while processing - {e}", "metadata": metadata},
         )
 
 
