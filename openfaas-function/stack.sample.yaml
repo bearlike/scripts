@@ -26,6 +26,13 @@ functions:
       PORTAINER_USERNAME: "username"
       PORTAINER_PASSWORD: "password"
 
+  linkedin-send-connection-request:
+    lang: python3-http
+    handler: ./linkedin-send-connection-request
+    image: linkedin-send-connection-request:latest
+    environment:
+      BROWSER_USE_URL: "https://browseruse.server.local/"
+
 configuration:
   templates:
     - name: python3-http
