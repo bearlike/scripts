@@ -85,7 +85,7 @@ def handle(event, context):
         if not profile_url:
             raise Exception("linkedin_profile not provided or empty")
 
-        prompt_dir = os.path.basename(os.path.join(__file__, "prompts"))
+        prompt_dir = os.path.join(os.path.dirname(__file__), "prompts")
         task_prompt = render_template(
             os.path.join(prompt_dir, "task.md.j2"), PROFILE_URL=profile_url
         )
@@ -98,7 +98,9 @@ def handle(event, context):
         if BROWSER_USE_URL is None:
             raise Exception("BROWSER_USE_URL not provided or empty")
 
-        client = Client(BROWSER_USE_URL, ssl_verify=False)
+        client = Client(
+            BROWSER_USE_URL, ssl_verify=False, httpx_kwargs={"timeout": 300}
+        )
         result = client.predict(
             window_w=1280,
             window_h=1100,
@@ -131,7 +133,9 @@ def handle(event, context):
         return build_response(body=response)
     except Exception as e:
         logger.exception("An error occurred while handling the request")
-        return build_response(status_code=500, body={"error": str(e)})
+        return build_response(
+            status_code=500, body={"error": f"Error while processing - {e}"}
+        )
 
 
 if __name__ == "__main__":
@@ -152,7 +156,7 @@ if __name__ == "__main__":
                 return format_event(self)
 
         byte_data = (
-            b'{"linkedin_profile": "https://www.linkedin.com/in/dhavalmparekh/"}'
+            b'{"linkedin_profile": "https://www.linkedin.com/in/francescapalmen"}'
         )
         test_event = TestEvent(
             method="POST",
