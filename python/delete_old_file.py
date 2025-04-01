@@ -32,7 +32,8 @@ def run(path="/path/to/downloads", exceptions=None, max_days=10):
                 if not any(
                     map(file_path.__contains__, exceptions)
                 ) and not file_path.endswith(".!qb"):
-                    modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+                    modified_time = datetime.fromtimestamp(
+                        os.path.getmtime(file_path))
                     today = datetime.today()
                     file_age = today - modified_time
                     if file_age.days >= max_days:
@@ -53,7 +54,8 @@ def run(path="/path/to/downloads", exceptions=None, max_days=10):
     except Exception as _err:
         logging.error("Service interrupted. %s", _err)
         logging.error(
-            "Deleted %s files of %s bytes until error.", str(del_count), str(del_size)
+            "Deleted %s files of %s bytes until error.", str(
+                del_count), str(del_size)
         )
 
 
