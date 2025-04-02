@@ -3,9 +3,44 @@ import json
 import unittest
 from dotenv import load_dotenv
 from unittest.mock import patch, MagicMock
-from handler import handle, PortainerAPIClient, ServiceManager
+from .handler import handle, PortainerAPIClient, ServiceManager
 
 load_dotenv()
+
+ENDPOINTS_CONFIG = {
+    "endpoints": {
+        "1": {
+            "name": "Example-Server-1",
+            "docker_version": "v1.xx",
+            "stacks": {
+                "101": "service-a",
+                "102": "service-b",
+                "103": "service-c",
+                "104": "service-d",
+                "105": "service-e",
+                "106": "service-f",
+                "107": "service-g",
+                "108": "service-h",
+            },
+        },
+        "2": {
+            "name": "Example-Server-2",
+            "docker_version": "v1.xx",
+            "stacks": {
+                "201": "service-z",
+            },
+        },
+    }
+}
+
+
+class TestEvent:
+    def __init__(self, method="POST", body=None, headers=None, query=None, path=None):
+        self.method = method
+        self.body = body
+        self.headers = headers or {}
+        self.query = query or {}
+        self.path = path or ""
 
 
 class TestSpotStartService(unittest.TestCase):
@@ -25,8 +60,8 @@ class TestSpotStartService(unittest.TestCase):
             "stack_id": "80",
         }
 
-        # Test event with body as string
-        event = {"body": json.dumps({"service": "nextcloud"})}
+        # Use dict for body instead of JSON string
+        event = TestEvent(method="POST", body={"service": "nextcloud"})
 
         # Call handler
         result = handle(event, {})
@@ -44,8 +79,8 @@ class TestSpotStartService(unittest.TestCase):
     @patch("handler.ServiceManager")
     def test_handle_missing_service(self, mock_service_manager, mock_api_client):
         """Test that handle returns error when service is missing"""
-        # Test event with no service
-        event = {"body": json.dumps({"other_field": "value"})}
+        # Use TestEvent object instead of dict
+        event = TestEvent(method="POST", body={"other_field": "value"})
 
         # Call handler
         result = handle(event, {})
@@ -58,7 +93,7 @@ class TestSpotStartService(unittest.TestCase):
         # Verify mocks
         mock_service_manager.return_value.start_service.assert_not_called()
 
-    @patch("handler.requests")
+    @patch("portainer.requests")
     def test_portainer_api_client_authenticate(self, mock_requests):
         """Test API client authentication"""
         # Setup mock
@@ -83,12 +118,12 @@ class TestSpotStartService(unittest.TestCase):
         """Test finding service location"""
         # Create manager with mock client
         mock_client = MagicMock()
-        manager = ServiceManager(mock_client)
+        manager = ServiceManager(mock_client, endpoints_config=ENDPOINTS_CONFIG)
 
         # Test finding existing service
-        location = manager.find_service_location("nextcloud")
+        location = manager.find_service_location("service-a")
         self.assertIsNotNone(location)
-        self.assertEqual(location, ("12", "80"))
+        self.assertEqual(location, ("1", "101"))
 
         # Test finding non-existent service
         location = manager.find_service_location("nonexistent")

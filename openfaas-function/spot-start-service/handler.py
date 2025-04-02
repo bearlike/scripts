@@ -172,7 +172,7 @@ if __name__ == "__main__":
         def __repr__(self):
             return format_event(self)
 
-    byte_data = b'{"referral_url": "https://n8n.hurricane.home"}'
+    byte_data = b'{"referral_url": "https://jupyter.hurricane.home"}'
     test_event = TestEvent(
         method="POST",
         body=byte_data,

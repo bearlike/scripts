@@ -382,7 +382,7 @@ class ServiceManager:
                         labels.get("home.resolve.domain", "").lower().strip()
                     )
                     project_name: str = (
-                        labels.get("com.docker.compose.project" "").lower().strip()
+                        labels.get("com.docker.compose.project", "").lower().strip()
                     )
 
                     # Skip if missing important labels
@@ -401,6 +401,7 @@ class ServiceManager:
                 logger.warning(
                     f"Error fetching containers for endpoint {endpoint_id}: {str(e)}"
                 )
+                logger.warning(f"Error-ed Entry - {container}")
                 continue
 
         if not service_name:
