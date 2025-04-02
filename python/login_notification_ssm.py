@@ -44,7 +44,8 @@ def get_key():
                     return response.json().get("value")
             except requests.exceptions.Timeout:
                 logging.warning(
-                    "[%s/%s] Timed-out so trying again.", str(count + 1), str(retries)
+                    "[%s/%s] Timed-out so trying again.", str(
+                        count + 1), str(retries)
                 )
             except requests.ConnectionError as error:
                 logging.error(

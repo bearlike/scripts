@@ -22,7 +22,8 @@ EmitterType = Optional[Callable[[dict], Awaitable[None]]]
 
 
 class SendCitationType(Protocol):
-    def __call__(self, url: str, title: str, content: str) -> Awaitable[None]: ...
+    def __call__(self, url: str, title: str,
+                 content: str) -> Awaitable[None]: ...
 
 
 class SendStatusType(Protocol):
@@ -81,7 +82,8 @@ class Pipe:
         LANGFUSE_URL: str = Field(
             default="http://langfuse-server:3000", description="Langfuse URL"
         )
-        MODEL_PREFIX: str = Field(default="ReAct", description="Prefix before model ID")
+        MODEL_PREFIX: str = Field(
+            default="ReAct", description="Prefix before model ID")
 
     def __init__(self):
         self.type = "manifold"
@@ -104,7 +106,8 @@ class Pipe:
     def setup(self):
         v = self.valves
         if not v.OPENAI_API_KEY or not v.OPENAI_BASE_URL:
-            raise Exception("Error: OPENAI_API_KEY or OPENAI_BASE_URL is not set")
+            raise Exception(
+                "Error: OPENAI_API_KEY or OPENAI_BASE_URL is not set")
         self.openai_kwargs = {
             "base_url": v.OPENAI_BASE_URL,
             "api_key": v.OPENAI_API_KEY,
@@ -134,8 +137,9 @@ class Pipe:
 
         self.setup()
 
-        model_id = body["model"][body["model"].rfind(".") + 1 :]
-        model = ChatOpenAI(model=model_id, **self.openai_kwargs)  # type: ignore
+        model_id = body["model"][body["model"].rfind(".") + 1:]
+        model = ChatOpenAI(model=model_id, **
+                           self.openai_kwargs)  # type: ignore
         if self.langfuse_kwargs:
             user_kwargs = {"user_id": __user__["id"]} if __user__ else {}
             callback_kwargs = self.langfuse_kwargs | user_kwargs
@@ -174,7 +178,8 @@ class Pipe:
         graph = create_react_agent(model, tools=tools)
         inputs = {"messages": body["messages"]}
         num_tool_calls = 0
-        async for event in graph.astream_events(inputs, version="v2", config=config):  # type: ignore
+        # type: ignore
+        async for event in graph.astream_events(inputs, version="v2", config=config):
             kind = event["event"]
             data = event["data"]
             if kind == "on_chat_model_stream":

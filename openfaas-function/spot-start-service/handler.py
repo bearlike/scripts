@@ -48,7 +48,8 @@ try:
     ENDPOINTS_CONFIG = PORTAINER_ENDPOINTS_CONFIG.copy()
 except ImportError as err_msg:
     logger.exception(err_msg)
-    logger.exception("Failed to import constants.py. You may need to create it.")
+    logger.exception(
+        "Failed to import constants.py. You may need to create it.")
     raise err_msg
 
 
@@ -121,7 +122,8 @@ def handle(event, context):
             # Find the service name from the referral URL
             service_name = service_manager.find_service_from_url(referral_url)
             if not service_name:
-                logger.error(f"No service found for referral URL: {referral_url}")
+                logger.error(
+                    f"No service found for referral URL: {referral_url}")
                 return build_response(
                     status_code=404,
                     body={
@@ -133,14 +135,16 @@ def handle(event, context):
             # Start the service
             result = service_manager.start_service(service_name)
             status_code = 200 if result.get("success", False) else 500
-            logger.success(f"Request processed with status {status_code}: {result}")
+            logger.success(
+                f"Request processed with status {status_code}: {result}")
             return build_response(status_code=status_code, body=result)
 
     except json.JSONDecodeError as e:
         logger.error(f"Invalid JSON in request: {str(e)}")
         return build_response(
             status_code=400,
-            body={"error": "Invalid JSON in request", "event": format_event(event)},
+            body={"error": "Invalid JSON in request",
+                  "event": format_event(event)},
         )
 
     except Exception as e:

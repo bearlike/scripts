@@ -118,7 +118,8 @@ class TestSpotStartService(unittest.TestCase):
         """Test finding service location"""
         # Create manager with mock client
         mock_client = MagicMock()
-        manager = ServiceManager(mock_client, endpoints_config=ENDPOINTS_CONFIG)
+        manager = ServiceManager(
+            mock_client, endpoints_config=ENDPOINTS_CONFIG)
 
         # Test finding existing service
         location = manager.find_service_location("service-a")
