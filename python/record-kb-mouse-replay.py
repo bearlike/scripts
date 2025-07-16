@@ -272,7 +272,8 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(status_area_label)
         self.status_text = QTextEdit()
         self.status_text.setReadOnly(True)
-        self.status_text.setPlaceholderText("Live status messages appear here ...")
+        self.status_text.setPlaceholderText(
+            "Live status messages appear here ...")
         main_layout.addWidget(self.status_text)
 
         central_widget.setLayout(main_layout)
@@ -310,7 +311,8 @@ class MainWindow(QMainWindow):
     def handle_new_interaction(self, interaction):
         self.recorded_interactions.append(interaction)
         self.append_status(f"Recorded: {interaction}")
-        self.steps_label.setText(f"Steps Recorded: {len(self.recorded_interactions)}")
+        self.steps_label.setText(
+            f"Steps Recorded: {len(self.recorded_interactions)}")
 
     def stop_recording(self):
         if self.recorder:
