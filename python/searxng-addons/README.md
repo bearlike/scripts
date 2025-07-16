@@ -10,13 +10,16 @@ This repository contains custom engine implementations that extend SearXNG's cap
 
 ### 1. Homepage Dashboard Integration (`dashboard_services.py`)
 
-Integrates with [`gethomepage/homepage`](https://github.com/gethomepage/homepage) to search through your self-hosted services and applications.
+Integrates with [`gethomepage/homepage`](https://github.com/gethomepage/homepage), a customizable home or startpage with Docker and service API support. This enables your home lab dashboard to become fully searchable using SearXNG.
+
+**Motivation** - Managing many self-hosted services in my home lab was inconvenient. I needed to remember where each app lived and to search through my dashboard manually. With this integration, I can use homepage's API and add search and filtering so it's much easier to discover and launch any internal service directly from SearXNG.
 
 **Features:**
 
-- Search across all configured services in your homepage dashboard
-- Hierarchical search through service groups and categories
-- Rich results showing service descriptions, server info, and container details
-- Direct links to your self-hosted applications
+- Case-insensitive substring matching works across service names, descriptions, and metadata
+- Results are scored by relevance, with service name matches considered most important
+- Supports hierarchical search through service groups and categories
+- Displays service descriptions, server information, and container details in results
+- Provides direct links to your self-hosted applications
 
 ![SearXNG Homepage Integration](/docs/searxng-homepage.png)
