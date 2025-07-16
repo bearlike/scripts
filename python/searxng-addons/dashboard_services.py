@@ -53,6 +53,7 @@ base_url = f"{HOMEPAGE_BASE_URL}/api/services"
 # Store the current query
 _current_query = ""
 
+
 def request(query, params):
     """Build the request parameters for the dashboard services API."""
     global _current_query
@@ -65,6 +66,7 @@ def request(query, params):
         'User-Agent': 'SearXNG Dashboard Services Engine'
     }
     return params
+
 
 def response(resp):
     """Parse the API response and return search results."""
@@ -110,7 +112,8 @@ def response(resp):
                     subgroup_name = subgroup.get('name', 'Unknown Subgroup')
                     if 'services' in subgroup:
                         for service in subgroup['services']:
-                            score = _calculate_match_score(service, f"{group_name} > {subgroup_name}", query)
+                            score = _calculate_match_score(
+                                service, f"{group_name} > {subgroup_name}", query)
                             if score > 0:  # Only include if there's a match
                                 matched_services.append({
                                     'service': service,
@@ -123,13 +126,16 @@ def response(resp):
 
         # Create results from sorted matches
         for match in matched_services:
-            results.append(_create_service_result(match['service'], match['group_name']))
+            results.append(_create_service_result(
+                match['service'], match['group_name']))
 
     except Exception as e:
         print(f"Dashboard Services Engine Error: {e}")
-        print(f"Response content: {resp.text[:200]}...")  # Show first 200 chars for debugging
+        # Show first 200 chars for debugging
+        print(f"Response content: {resp.text[:200]}...")
 
     return results
+
 
 def _calculate_match_score(service, group_name, query):
     """Calculate a relevance score based on where the query matches."""
@@ -155,6 +161,7 @@ def _calculate_match_score(service, group_name, query):
         score += 3  # Medium-low weight for group match
 
     return score
+
 
 def _create_service_result(service, group_name):
     """Create a search result from a service object."""
