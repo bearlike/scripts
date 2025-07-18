@@ -200,7 +200,8 @@ class LLMClient:
                 if "content" in delta:
                     yield delta["content"]
         except json.JSONDecodeError:
-            logger.error('ChunkDecodeError: unable to parse "%s"', chunk_str[:100])
+            logger.error('ChunkDecodeError: unable to parse "%s"',
+                         chunk_str[:100])
 
 
 class Node:
@@ -473,7 +474,8 @@ class MCTSAgent:
             score = int(re.search(r"\d+", result).group())
             return score
         except Exception as e:
-            logger.error("Failed to parse score from result: %s - %s", result, e)
+            logger.error(
+                "Failed to parse score from result: %s - %s", result, e)
             return 0
 
     async def generate_completion(self, prompt: str):
@@ -715,7 +717,8 @@ class Pipe:
         if match:
             backend, model_name = match.groups()
         else:
-            logger.error("Model ID should be in the format '*.mcts/backend/model_name'")
+            logger.error(
+                "Model ID should be in the format '*.mcts/backend/model_name'")
             logger.error("Invalid model ID: %s", model_id)
             return ""
 
