@@ -1,0 +1,211 @@
+<div class="llm-answer-container">
+    <div class="llm-answer-content">
+        {{ answer.answer|safe }}
+    </div>
+
+    <style>
+        .llm-answer-container {
+            background: var(--color-answer-background);
+            color: var(--color-answer-font);
+            border-left: 4px solid var(--color-btn-background);
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--color-result-border);
+        }
+
+        /* Header styling */
+        .llm-answer-container .llm-header {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .llm-answer-container .llm-header strong {
+            color: var(--color-btn-background);
+        }
+
+        .llm-answer-container .llm-header span {
+            color: var(--color-base-font);
+            opacity: 0.8;
+        }
+
+        /* Content styling */
+        .llm-answer-container .llm-content {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* Markdown-generated content styling using theme variables */
+        .llm-answer-container h1,
+        .llm-answer-container h2,
+        .llm-answer-container h3,
+        .llm-answer-container h4,
+        .llm-answer-container h5,
+        .llm-answer-container h6 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--color-answer-font);
+        }
+
+        .llm-answer-container h2 {
+            font-size: 1.2em;
+            border-bottom: 1px solid var(--color-result-border);
+            padding-bottom: 4px;
+        }
+
+        .llm-answer-container h3 {
+            font-size: 1.1em;
+        }
+
+        .llm-answer-container ul,
+        .llm-answer-container ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .llm-answer-container li {
+            margin: 4px 0;
+        }
+
+        .llm-answer-container p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .llm-answer-container code {
+            background: var(--color-doc-code-background);
+            color: var(--color-doc-code);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .llm-answer-container pre {
+            background: var(--color-doc-code-background);
+            color: var(--color-doc-code);
+            border: 1px solid var(--color-result-border);
+            border-radius: 4px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        .llm-answer-container pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .llm-answer-container blockquote {
+            border-left: 3px solid var(--color-btn-background);
+            margin: 12px 0;
+            padding-left: 12px;
+            color: var(--color-base-font);
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .llm-answer-container strong {
+            color: var(--color-answer-font);
+            font-weight: 600;
+        }
+
+        .llm-answer-container em {
+            color: var(--color-base-font);
+            opacity: 0.9;
+        }
+
+        .llm-answer-container a {
+            color: var(--color-result-link-font);
+            text-decoration: underline;
+        }
+
+        .llm-answer-container a:hover {
+            color: var(--color-result-link-font-highlight);
+        }
+
+        .llm-answer-container a:visited {
+            color: var(--color-result-link-visited-font);
+        }
+
+        /* Footer styling */
+        .llm-answer-container .llm-footer {
+            border-top: 1px solid var(--color-result-border);
+            padding-top: 8px;
+            margin-top: 12px;
+            font-size: 0.85em;
+            color: var(--color-base-font);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .llm-answer-container .llm-footer .model-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .llm-answer-container .llm-footer .model-name {
+            font-weight: 600;
+            color: var(--color-answer-font);
+        }
+
+        .llm-answer-container .llm-footer .disclaimer {
+            opacity: 0.8;
+        }
+
+        /* GitHub button styling with theme support */
+        .llm-answer-container .github-link {
+            display: inline-flex;
+            align-items: center;
+            background: var(--color-toolkit-badge-background);
+            color: var(--color-toolkit-badge-font);
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8em;
+            transition: all 0.2s ease;
+            border: 1px solid var(--color-result-border);
+        }
+
+        .llm-answer-container .github-link:hover {
+            background: var(--color-btn-background);
+            color: var(--color-btn-font);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+        .llm-answer-container .github-link svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+            fill: currentColor;
+            transition: transform 0.2s ease;
+        }
+
+        .llm-answer-container .github-link:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Responsive design */
+        @media (max-width: 50em) {
+            .llm-answer-container .llm-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .llm-answer-container .llm-footer .model-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+    </style>
+</div>
