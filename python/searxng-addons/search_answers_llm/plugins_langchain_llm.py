@@ -73,12 +73,14 @@ class SXNGPlugin(Plugin):
 
     def __init__(self, plg_cfg: "PluginCfg") -> None:
         super().__init__(plg_cfg)
-        print(f"[DEBUG] LangChain plugin initialized with active={plg_cfg.active}")
+        print(
+            f"[DEBUG] LangChain plugin initialized with active={plg_cfg.active}")
 
         self.info = PluginInfo(
             id=self.id,
             name=gettext("LangChain LLM"),
-            description=gettext("Generate AI answers using LLM with rich formatting"),
+            description=gettext(
+                "Generate AI answers using LLM with rich formatting"),
             preference_section="general",
         )
 
@@ -105,7 +107,8 @@ class SXNGPlugin(Plugin):
     ) -> EngineResults:
         results = EngineResults()
 
-        print(f"[DEBUG] post_search called for query: {search.search_query.query}")
+        print(
+            f"[DEBUG] post_search called for query: {search.search_query.query}")
 
         # Only process on first page
         if search.search_query.pageno > 1:
@@ -195,7 +198,8 @@ class SXNGPlugin(Plugin):
                 timeout_limit=5.0,  # 5 second timeout for context search
             )
 
-            print(f"[DEBUG] Created SearchQuery with {len(engine_refs)} engines")
+            print(
+                f"[DEBUG] Created SearchQuery with {len(engine_refs)} engines")
 
             # Execute the search
             context_search = Search(context_search_query)
@@ -276,7 +280,8 @@ Based on the search results above, provide a helpful and accurate answer to the 
             print(f"[DEBUG] Generated contextual response: {answer[:100]}...")
 
             # Create formatted HTML answer from markdown
-            formatted_answer = self._format_html_answer(answer, has_context=True)
+            formatted_answer = self._format_html_answer(
+                answer, has_context=True)
             return formatted_answer
 
         except Exception as e:
@@ -313,7 +318,8 @@ Based on the search results above, provide a helpful and accurate answer to the 
             print(f"[DEBUG] Generated simple response: {answer[:100]}...")
 
             # Create formatted HTML answer from markdown
-            formatted_answer = self._format_html_answer(answer, has_context=False)
+            formatted_answer = self._format_html_answer(
+                answer, has_context=False)
             return formatted_answer
 
         except Exception as e:
@@ -352,7 +358,8 @@ Based on the search results above, provide a helpful and accurate answer to the 
             content = result.get("content", "")
             if content:
                 # Truncate content to avoid token limits
-                content = content[:300] + "..." if len(content) > 300 else content
+                content = content[:300] + \
+                    "..." if len(content) > 300 else content
                 context_parts.append(f"Content: {content}")
 
             source = result.get("engine", "Unknown")
