@@ -1,211 +1,380 @@
-<div class="llm-answer-container">
-    <div class="llm-answer-content">
-        {{ answer.answer|safe }}
+<div class="search-assist-container" id="llm-answer-{{ answer.uuid }}">
+    <!-- Header -->
+    <div class="assist-header">
+        <div class="assist-title">
+            <span>
+                🤖 AI Assistant
+                <small class="context-badge"></small>
+            </span>
+        </div>
+        <div class="assist-icons">
+            <svg class="icon-info" width="20" height="20" viewBox="0 0 640 640" fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg" title="Information about this AI-generated answer.">
+                <path
+                    d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM288 224C288 206.3 302.3 192 320 192C337.7 192 352 206.3 352 224C352 241.7 337.7 256 320 256C302.3 256 288 241.7 288 224zM280 288L328 288C341.3 288 352 298.7 352 312L352 400L360 400C373.3 400 384 410.7 384 424C384 437.3 373.3 448 360 448L280 448C266.7 448 256 437.3 256 424C256 410.7 266.7 400 280 400L304 400L304 336L280 336C266.7 336 256 325.3 256 312C256 298.7 266.7 288 280 288z" />
+            </svg>
+
+        </div>
     </div>
 
-    <style>
-        .llm-answer-container {
-            background: var(--color-answer-background);
-            color: var(--color-answer-font);
-            border-left: 4px solid var(--color-btn-background);
-            padding: 16px;
-            margin: 12px 0;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--color-result-border);
-        }
+    <!-- Collapsible Content -->
+    <div class="assist-content-wrapper">
+        <div class="assist-content">
+            {{ answer.answer|safe }}
+        </div>
+    </div>
 
-        /* Header styling */
-        .llm-answer-container .llm-header {
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    <!-- Toggle Button -->
+    <div class="assist-toggle-container">
+        <button class="assist-toggle-button">
+            <span>More</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
+    </div>
 
-        .llm-answer-container .llm-header strong {
-            color: var(--color-btn-background);
-        }
-
-        .llm-answer-container .llm-header span {
-            color: var(--color-base-font);
-            opacity: 0.8;
-        }
-
-        /* Content styling */
-        .llm-answer-container .llm-content {
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
-
-        /* Markdown-generated content styling using theme variables */
-        .llm-answer-container h1,
-        .llm-answer-container h2,
-        .llm-answer-container h3,
-        .llm-answer-container h4,
-        .llm-answer-container h5,
-        .llm-answer-container h6 {
-            margin-top: 16px;
-            margin-bottom: 8px;
-            color: var(--color-answer-font);
-        }
-
-        .llm-answer-container h2 {
-            font-size: 1.2em;
-            border-bottom: 1px solid var(--color-result-border);
-            padding-bottom: 4px;
-        }
-
-        .llm-answer-container h3 {
-            font-size: 1.1em;
-        }
-
-        .llm-answer-container ul,
-        .llm-answer-container ol {
-            margin: 8px 0;
-            padding-left: 20px;
-        }
-
-        .llm-answer-container li {
-            margin: 4px 0;
-        }
-
-        .llm-answer-container p {
-            margin: 8px 0;
-            line-height: 1.5;
-        }
-
-        .llm-answer-container code {
-            background: var(--color-doc-code-background);
-            color: var(--color-doc-code);
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 0.9em;
-        }
-
-        .llm-answer-container pre {
-            background: var(--color-doc-code-background);
-            color: var(--color-doc-code);
-            border: 1px solid var(--color-result-border);
-            border-radius: 4px;
-            padding: 12px;
-            overflow-x: auto;
-            margin: 12px 0;
-        }
-
-        .llm-answer-container pre code {
-            background: none;
-            padding: 0;
-        }
-
-        .llm-answer-container blockquote {
-            border-left: 3px solid var(--color-btn-background);
-            margin: 12px 0;
-            padding-left: 12px;
-            color: var(--color-base-font);
-            font-style: italic;
-            opacity: 0.9;
-        }
-
-        .llm-answer-container strong {
-            color: var(--color-answer-font);
-            font-weight: 600;
-        }
-
-        .llm-answer-container em {
-            color: var(--color-base-font);
-            opacity: 0.9;
-        }
-
-        .llm-answer-container a {
-            color: var(--color-result-link-font);
-            text-decoration: underline;
-        }
-
-        .llm-answer-container a:hover {
-            color: var(--color-result-link-font-highlight);
-        }
-
-        .llm-answer-container a:visited {
-            color: var(--color-result-link-visited-font);
-        }
-
-        /* Footer styling */
-        .llm-answer-container .llm-footer {
-            border-top: 1px solid var(--color-result-border);
-            padding-top: 8px;
-            margin-top: 12px;
-            font-size: 0.85em;
-            color: var(--color-base-font);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .llm-answer-container .llm-footer .model-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .llm-answer-container .llm-footer .model-name {
-            font-weight: 600;
-            color: var(--color-answer-font);
-        }
-
-        .llm-answer-container .llm-footer .disclaimer {
-            opacity: 0.8;
-        }
-
-        /* GitHub button styling with theme support */
-        .llm-answer-container .github-link {
-            display: inline-flex;
-            align-items: center;
-            background: var(--color-toolkit-badge-background);
-            color: var(--color-toolkit-badge-font);
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.8em;
-            transition: all 0.2s ease;
-            border: 1px solid var(--color-result-border);
-        }
-
-        .llm-answer-container .github-link:hover {
-            background: var(--color-btn-background);
-            color: var(--color-btn-font);
-            transform: translateY(-1px);
-            text-decoration: none;
-        }
-
-        .llm-answer-container .github-link svg {
-            width: 16px;
-            height: 16px;
-            margin-right: 4px;
-            fill: currentColor;
-            transition: transform 0.2s ease;
-        }
-
-        .llm-answer-container .github-link:hover svg {
-            transform: scale(1.1);
-        }
-
-        /* Responsive design */
-        @media (max-width: 50em) {
-            .llm-answer-container .llm-footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .llm-answer-container .llm-footer .model-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-        }
-    </style>
+    <!-- Footer -->
+    <div class="assist-footer">
+        <span>Auto-generated based on listed sources. May contain inaccuracies.</span>
+        <div class="assist-feedback">
+            <span>Was this helpful?</span>
+            <svg width="18" height="18" viewBox="0 0 640 640" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                class="feedback-icon" title="Helpful">
+                <path
+                    d="M144 224C161.7 224 176 238.3 176 256L176 512C176 529.7 161.7 544 144 544L96 544C78.3 544 64 529.7 64 512L64 256C64 238.3 78.3 224 96 224L144 224zM334.6 80C361.9 80 384 102.1 384 129.4L384 133.6C384 140.4 382.7 147.2 380.2 153.5L352 224L512 224C538.5 224 560 245.5 560 272C560 291.7 548.1 308.6 531.1 316C548.1 323.4 560 340.3 560 360C560 383.4 543.2 402.9 521 407.1C525.4 414.4 528 422.9 528 432C528 454.2 513 472.8 492.6 478.3C494.8 483.8 496 489.8 496 496C496 522.5 474.5 544 448 544L360.1 544C323.8 544 288.5 531.6 260.2 508.9L248 499.2C232.8 487.1 224 468.7 224 449.2L224 262.6C224 247.7 227.5 233 234.1 219.7L290.3 107.3C298.7 90.6 315.8 80 334.6 80z" />
+            </svg>
+            <svg width="18" height="18" viewBox="0 0 640 640" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                class="feedback-icon" title="Not helpful">
+                <path
+                    d="M448 96C474.5 96 496 117.5 496 144C496 150.3 494.7 156.2 492.6 161.7C513 167.2 528 185.8 528 208C528 217.1 525.4 225.6 521 232.9C543.2 237.1 560 256.6 560 280C560 299.7 548.1 316.6 531.1 324C548.1 331.4 560 348.3 560 368C560 394.5 538.5 416 512 416L352 416L380.2 486.4C382.7 492.7 384 499.5 384 506.3L384 510.5C384 537.8 361.9 559.9 334.6 559.9C315.9 559.9 298.8 549.3 290.4 532.6L234.1 420.3C227.4 407 224 392.3 224 377.4L224 190.8C224 171.4 232.9 153 248 140.8L260.2 131.1C288.6 108.4 323.8 96 360.1 96L448 96zM144 160C161.7 160 176 174.3 176 192L176 448C176 465.7 161.7 480 144 480L96 480C78.3 480 64 465.7 64 448L64 192C64 174.3 78.3 160 96 160L144 160z" />
+            </svg>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Structure -->
+<div id="info-modal-{{ answer.uuid }}" class="assist-modal">
+    <div class="assist-modal-content">
+        <span class="assist-modal-close">&times;</span>
+        <h2>About this Answer</h2>
+        <p>This answer was generated by an AI assistant to provide a quick summary based on search results.</p>
+        <ul>
+            <li><strong>Model Used:</strong> <span class="modal-model-name">Not specified</span></li>
+            <li><strong>Plugin Source:</strong> <a href="https://github.com/bearlike/scripts"
+                    target="_blank">bearlike/scripts</a></li>
+        </ul>
+        <p class="disclaimer">Please be aware that AI-generated content may contain inaccuracies. Always verify
+            important information from the source links.</p>
+    </div>
+</div>
+
+<style>
+    .search-assist-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: rgb(35, 37, 42);
+        color: #e0e0e0;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        border: 1px solid #444;
+    }
+
+    /* Header */
+    .assist-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .assist-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 1.1em;
+        color: #f0f0f0;
+    }
+
+    .assist-title .context-badge {
+        font-size: 0.8em;
+        font-weight: 400;
+        color: #aaa;
+        margin-left: 4px;
+    }
+
+    .assist-icons {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #aaa;
+    }
+
+    .assist-icons svg {
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .assist-icons svg:hover {
+        color: #fff;
+    }
+
+    /* Content */
+    .assist-content-wrapper {
+        max-height: 120px;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
+        position: relative;
+    }
+
+    .assist-content-wrapper.expanded {
+        max-height: 2000px;
+    }
+
+    .assist-content-wrapper:not(.expanded)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to top, rgb(35, 37, 42), transparent);
+        pointer-events: none;
+    }
+
+    .assist-content {
+        line-height: 1.6;
+        padding-bottom: 8px;
+    }
+
+    /* Toggle Button */
+    .assist-toggle-container {
+        text-align: center;
+        margin-top: 8px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 16px;
+        margin-bottom: 12px;
+    }
+
+    .assist-toggle-button {
+        background-color: #3a3f44;
+        color: #e0e0e0;
+        border: 1px solid #555;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.9em;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .assist-toggle-button:hover {
+        background-color: #4a4f54;
+    }
+
+    .assist-toggle-button svg {
+        transition: transform 0.3s ease;
+    }
+
+    .assist-toggle-button.expanded svg {
+        transform: rotate(180deg);
+    }
+
+    /* Footer */
+    .assist-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8em;
+        color: #aaa;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .assist-feedback {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .assist-feedback .feedback-icon {
+        cursor: pointer;
+        padding: 2px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .assist-feedback .feedback-icon:hover {
+        background-color: #4a4f54;
+        color: #fff;
+    }
+
+    /* Modal Styles */
+    .assist-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+        animation: fadeIn 0.3s;
+    }
+
+    .assist-modal-content {
+        background-color: #2b2d31;
+        margin: 15% auto;
+        padding: 25px;
+        border: 1px solid #555;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 500px;
+        position: relative;
+        animation: slideIn 0.3s;
+    }
+
+    .assist-modal-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .assist-modal-close:hover,
+    .assist-modal-close:focus {
+        color: #fff;
+    }
+
+    .assist-modal-content h2 {
+        margin-top: 0;
+        color: #f0f0f0;
+    }
+
+    .assist-modal-content p {
+        color: #ccc;
+    }
+
+    .assist-modal-content ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .assist-modal-content li {
+        background-color: #33363a;
+        margin-bottom: 8px;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .assist-modal-content a {
+        color: #4e9af1;
+        text-decoration: none;
+    }
+
+    .assist-modal-content a:hover {
+        text-decoration: underline;
+    }
+
+    .assist-modal-content .disclaimer {
+        font-size: 0.9em;
+        color: #aaa;
+        border-top: 1px solid #444;
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Unique ID for the container to scope the script
+        const containerId = "llm-answer-{{ answer.uuid }}";
+        const container = document.getElementById(containerId);
+
+        if (container) {
+            // Extract data from the first div with data attributes in the answer content
+            const dataDiv = container.querySelector('.assist-content [data-model-name]');
+            const modelName = dataDiv ? dataDiv.getAttribute('data-model-name') : 'Not specified';
+            const hasContext = dataDiv ? dataDiv.getAttribute('data-has-context') === 'true' : false;
+
+            // Update the header badge based on context
+            const contextBadge = container.querySelector('.context-badge');
+            if (hasContext) {
+                contextBadge.textContent = '(with search context)';
+            } else {
+                contextBadge.textContent = '(general knowledge)';
+            }
+
+            // Update the modal with the model name
+            const modal = document.getElementById("info-modal-{{ answer.uuid }}");
+            const modelNameSpan = modal.querySelector('.modal-model-name');
+            if (modelNameSpan) {
+                modelNameSpan.textContent = modelName;
+            }
+
+            // --- Collapsible Logic ---
+            const contentWrapper = container.querySelector('.assist-content-wrapper');
+            const content = container.querySelector('.assist-content');
+            const toggleButton = container.querySelector('.assist-toggle-button');
+            const toggleContainer = container.querySelector('.assist-toggle-container');
+
+            requestAnimationFrame(() => {
+                if (content.scrollHeight <= contentWrapper.clientHeight) {
+                    toggleContainer.style.display = 'none';
+                    contentWrapper.style.maxHeight = 'none';
+                } else {
+                    toggleContainer.style.display = 'block';
+                }
+            });
+
+            toggleButton.addEventListener('click', () => {
+                const isExpanded = contentWrapper.classList.toggle('expanded');
+                toggleButton.classList.toggle('expanded', isExpanded);
+                toggleButton.querySelector('span').textContent = isExpanded ? 'Less' : 'More';
+            });
+
+            // --- Modal Logic ---
+            const infoIcon = container.querySelector('.icon-info');
+            const closeButton = modal.querySelector('.assist-modal-close');
+
+            infoIcon.onclick = () => { modal.style.display = "block"; }
+            closeButton.onclick = () => { modal.style.display = "none"; }
+
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+    });
+</script>
