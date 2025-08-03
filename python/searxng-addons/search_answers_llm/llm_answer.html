@@ -3,7 +3,12 @@
     <div class="assist-header">
         <div class="assist-title">
             <span>
-                🤖 AI Assistant
+                <svg width="20" height="20" viewBox="0 0 640 640" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                    style="margin-right: 8px; vertical-align: text-bottom;">
+                    <path
+                        d="M112 120C112 106.7 101.3 96 88 96C74.7 96 64 106.7 64 120L64 464C64 508.2 99.8 544 144 544L552 544C565.3 544 576 533.3 576 520C576 506.7 565.3 496 552 496L144 496C126.3 496 112 481.7 112 464L112 120zM216 192L424 192C437.3 192 448 181.3 448 168C448 154.7 437.3 144 424 144L216 144C202.7 144 192 154.7 192 168C192 181.3 202.7 192 216 192zM216 256C202.7 256 192 266.7 192 280C192 293.3 202.7 304 216 304L360 304C373.3 304 384 293.3 384 280C384 266.7 373.3 256 360 256L216 256zM216 368C202.7 368 192 378.7 192 392C192 405.3 202.7 416 216 416L488 416C501.3 416 512 405.3 512 392C512 378.7 501.3 368 488 368L216 368z" />
+                </svg>
+                Search Assist
                 <small class="context-badge"></small>
             </span>
         </div>
@@ -145,8 +150,56 @@
     }
 
     .assist-content {
-        line-height: 1.6;
+        line-height: 1.5;
         padding-bottom: 8px;
+    }
+
+    /* Markdown Rendered Content */
+    .assist-content h1,
+    .assist-content h2,
+    .assist-content h3,
+    .assist-content h4,
+    .assist-content h5,
+    .assist-content h6 {
+        margin-top: 0.6em;
+        margin-bottom: 0.4em;
+        line-height: 1.2;
+        font-weight: 600;
+    }
+
+    .assist-content p {
+        margin-block-start: 0.5em;
+        margin-block-end: 0.5em;
+    }
+
+    .assist-content ul,
+    .assist-content ol {
+        margin-block-start: 0.5em;
+        margin-block-end: 0.5em;
+        padding-inline-start: 30px;
+    }
+
+    .assist-content li {
+        margin-bottom: 0.3em;
+    }
+
+    .assist-content pre {
+        margin-block-start: 0.8em;
+        margin-block-end: 0.8em;
+    }
+
+    .assist-content code {
+        font-size: 0.9em;
+        padding: 0.1em 0.3em;
+        border-radius: 4px;
+        background-color: #2b2d31;
+    }
+
+    .assist-content pre code {
+        display: block;
+        padding: 0.8em;
+        border-radius: 6px;
+        background-color: #1e1e1e;
     }
 
     /* Toggle Button */

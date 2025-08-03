@@ -86,7 +86,7 @@ class SXNGPlugin(Plugin):
         # Initialize ChatOpenAI once and reuse
         self.llm = ChatOpenAI(
             model=self.model_name,
-            temperature=0.7,
+            temperature=0.5,
             base_url=environ.get(
                 "LLM_BASE_URL",
                 "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -253,9 +253,9 @@ class SXNGPlugin(Plugin):
             messages = [
                 SystemMessage(
                     content="""You are a helpful Search Engine assistant that provides accurate answers and sources based on search results.
+                    Use extractive summarization to identify key information from search results and avoid fillers.
                     Identify the most important information and links from the search results.
                     Format your response using Markdown syntax for better readability.
-                    Warn against potential malicious links when encounterd.
                     Keep the response concise but well-formatted in Markdown."""
                 ),
                 HumanMessage(
